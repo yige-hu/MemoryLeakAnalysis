@@ -19,3 +19,16 @@
 *.exe
 *.out
 *.app
+
+# Project-defined
+*.c
+*.bc
+*.ll
+*.so
+*.bak
+
+LiveAnalysis.h
+live.cpp
+
+pointer1
+pointer2

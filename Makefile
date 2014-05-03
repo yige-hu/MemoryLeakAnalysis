@@ -1,8 +1,15 @@
-all: dce-pass.so licm-pass.so
+all: SamplePass.so FunctionInfo.so MemLeak.so
 
-CXXFLAGS = -rdynamic $(shell llvm-config --cxxflags) -g -O0
+ANDERS_DIR=../andersen
+ANDERS_INCLUDES=$(ANDERS_DIR)/include
+ANDERS_LIB=$(ANDERS_DIR)/Debug+Asserts/lib
+
+CXXFLAGS = -rdynamic $(shell llvm-config --cxxflags) -g -O0 -std=c++11
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -I$(ANDERS_INCLUDES) -o $@ $^
 
 %.so: %.o
-	$(CXX) -dylib -flat_namespace -shared $^ -o $@
+	$(CXX) $(CXXFLAGS) -shared -L$(ANDERS_LIB) -lAnders -o $@ $^     # -flat_namespace 
 clean:
 	rm -f *.o *~ *.so

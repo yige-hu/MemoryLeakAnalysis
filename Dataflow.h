@@ -12,14 +12,19 @@
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/InstIterator.h"
+//#include "llvm/Support/InstIterator.h"
+#include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Instructions.h"
 
 #include "llvm/ADT/BitVector.h"
-#include "llvm/Assembly/AssemblyAnnotationWriter.h"
+//#include "llvm/Assembly/AssemblyAnnotationWriter.h"
+#include "llvm/IR/AssemblyAnnotationWriter.h"
 #include "llvm/Support/FormattedStream.h"
-#include "llvm/DebugInfo.h"
-#include "llvm/Support/CFG.h"
+//#include "llvm/DebugInfo.h"
+#include "llvm/IR/DebugInfo.h"
+//#include "llvm/Support/CFG.h"
+//#include "llvm/IR/CFG.h"
+#include "llvm/Analysis/CFG.h"
 
 #include <ostream>
 #include <fstream>
