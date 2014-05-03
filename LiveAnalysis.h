@@ -23,12 +23,14 @@ public:
     return bv_init;
   }
 
-  virtual void meet(BitVector *final, BitVector *temp, BasicBlock *curr, BasicBlock *last) {
+  virtual void meet(BitVector *final, BitVector *temp, BasicBlock *curr,
+      BasicBlock *last) {
     (*final) |= (*temp);
 
     for (BasicBlock::iterator i = last->begin(), ie = last->end(); 
         (i != ie) && (isa<PHINode>(i)); ++i) {
-      for (User::op_iterator OI = i -> op_begin(), OE = i -> op_end(); OI != OE; ++OI) {
+      for (User::op_iterator OI = i -> op_begin(), OE = i -> op_end();
+          OI != OE; ++OI) {
         Value *val = *OI;
         PHINode *p = cast<PHINode>(i);
         if ((curr == p->getIncomingBlock(*OI))
@@ -60,7 +62,8 @@ public:
 
     for (BasicBlock::iterator i = bb->begin(), ie = bb->end(); 
         (i != ie) && (isa<PHINode>(i)); ++i) {
-      for (User::op_iterator OI = i -> op_begin(), OE = i -> op_end(); OI != OE; ++OI) {
+      for (User::op_iterator OI = i -> op_begin(), OE = i -> op_end();
+          OI != OE; ++OI) {
         Value *val = *OI;
         if (isa<Instruction>(val) || isa<Argument>(val)) {
           final->set(val_num[val]);
@@ -78,19 +81,21 @@ public:
   }
 
 #if 1
-  virtual void emitBasicBlockStartAnnot(const BasicBlock *bb, formatted_raw_ostream &os) {
-      os << "; ";
-      for(LiveAnalysis::const_iterator iter = analysis.in_begin(bb); 
-          iter != analysis.in_end(bb); ++iter) {
-        os.write_escaped((*iter)->getName());
-        os << ", ";
-      }
-      os << "\n";
-   }
+  virtual void emitBasicBlockStartAnnot(const BasicBlock *bb,
+      formatted_raw_ostream &os) {
+    os << "; ";
+    for(LiveAnalysis::const_iterator iter = analysis.in_begin(bb); 
+        iter != analysis.in_end(bb); ++iter) {
+      os.write_escaped((*iter)->getName());
+      os << ", ";
+    }
+    os << "\n";
+  }
 #endif
 
 #if 1
-  virtual void emitInstructionAnnot(const Instruction *i, formatted_raw_ostream &os) {
+  virtual void emitInstructionAnnot(const Instruction *i,
+      formatted_raw_ostream &os) {
     if (isa<PHINode>(i)) {
       return;
     }

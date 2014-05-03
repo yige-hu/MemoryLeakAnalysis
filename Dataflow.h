@@ -127,7 +127,7 @@ public:
     (*final) = (*temp);
   }
 
-  virtual bool processFunction(Function &F) {
+  virtual bool processFunction(Function &F, Instruction* probInst = NULL) {
 
     // initialization
     val_cnt = 0;
@@ -170,7 +170,12 @@ public:
     if (_DIR == BACKWARDS) {
       boundary(&blk_out_bv[--(F.end())], &F);
 
-      worklist.insert(--(F.end()));
+      if (probInst == NULL) {
+        worklist.insert(--(F.end()));
+      } else {
+        worklist.insert(probInst->getParent());
+      }
+
       while (!worklist.empty()) {
 
         BasicBlock* b = *worklist.begin();
@@ -183,7 +188,8 @@ public:
         }
 
         _DOMAIN last;
-        for (BasicBlock::reverse_iterator i = b->rbegin(), ie = b->rend(); i != ie; ++i) {
+        for (BasicBlock::reverse_iterator i = b->rbegin(), ie = b->rend();
+            i != ie; ++i) {
           if (i == b->rbegin()) {
             last = blk_out_bv[b];
           }
@@ -208,7 +214,12 @@ public:
 
       boundary(&blk_in_bv[F.begin()], &F);
 
-      worklist.insert(F.begin());
+      if (probInst == NULL) {
+        worklist.insert(F.begin());
+      } else {
+        worklist.insert(probInst->getParent());
+      }
+
       while (!worklist.empty()) {
 
         BasicBlock* b = *worklist.begin();
