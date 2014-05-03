@@ -2,44 +2,29 @@ assignment3
 ====
 
 Yige Hu
-UTEID: yh6596
-cs account: yige
 
-Assignment 3 for CS380c
+CS380c final project:
+Memory leak detection.
 
+Implemented based on the paper:
 
+[Memory leak analysis by contradiction](http://dl.acm.org/citation.cfm?id=2090908)In Proceedings of the 13th international conference on Static Analysis (SAS'06), 2006.
+
+Program catalog:
 
 Dataflow.h:
   A basic framework for Data-flow analysis.
-LiveAnalysis.h:
-  A liveness analysis.
-ReachAnalysis.h:
-  A reaching defination analysis.
-live.cpp:
-  The live pass.
-reach.cpp:
-  The reach pass.
-
-
+LeakAnalysis.h:
+  A memory-leak analysis.
+FunctionInfo.so:
+  Print out the function info.
+MemLeak.cpp:
+  The leak pass.
 
 1. Compile & prepare for the inputs:
   make
-  ./prepare.sh
+  ./prepare.sh [c file names]
 
 2. Run:
-Liveness:
-  opt -load ./live.so -live sum-simp.bc > /dev/null
-
-Reaching definations:
-  opt -load ./reach.so -reach sum-simp.bc > /dev/null
-
-
-
-* You could use the scripts 'prepare.sh' to prepare the inputs. Just change the source file names.
-Otherwise, if you wanted to prepare input manually, run:
-
-clang -O0 -emit-llvm -c loop.c
-opt -mem2reg loop.bc -o loop-simp.bc
-
-opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./SamplePass.so -sample-pass sum.ll > /dev/null
 opt -load ./FunctionInfo.so -function-info pointer1-simp.bc
+opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./SamplePass.so -sample-pass sum.ll > /dev/null
