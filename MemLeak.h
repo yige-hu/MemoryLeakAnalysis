@@ -12,10 +12,12 @@ using namespace llvm;
 
 namespace {
 
+typedef std::vector<const Value*> ValSet;
+
 typedef struct triple_t {
-  std::vector<Instruction*> S;
-  std::vector<Instruction*> H;
-  std::vector<Instruction*> M;
+  ValSet S;
+  ValSet H;
+  ValSet M;
 
   bool operator==(const triple_t& rhs) {
     bool ret = ((this->S == rhs.S) && (this->H == rhs.H) && (this->M == rhs.M));
@@ -30,8 +32,9 @@ typedef struct triple_t {
 
 
 bool isLeakProb(Instruction *inst) {
-  bool ret = (isa<LoadInst>(inst));
-  //ret = (isa<LoadInst>(inst)) || (isa<BitCast>(inst)) || (isa<>(inst));
+  bool ret = (isa<StoreInst>(inst));
+  //ret = (isa<StoreInst>(inst)) || (isa<BitCastInst>(inst))
+  //          || ((isa<CallInst>(inst) && 0));
   return ret;
 }
 

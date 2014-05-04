@@ -20,15 +20,37 @@ class LeakAnalysis : public DataFlowAnalysis<Triple, BACKWARDS> {
 public:
 
   Andersen *anders;
+  ValSet allocSites;
 
   LeakAnalysis() {}
   LeakAnalysis(Andersen *ads) {
     anders = ads;
+    anders->getAllAllocationSites(allocSites);
   }
 
-  virtual Triple getTop(int val_cnt) {
+  ValSet getPt(Instruction *inst) {
+    assert(inst->getType()->isPointerTy() && "getPt: Inst is not a pointer type!");
+    ValSet ret;
+    assert(anders->getPointsToSet(inst, ret) &&
+        "getPt: cannot get points to set of inst.");
+    return ret;
+  }
+
+  virtual Triple getTop(int val_cnt, Instruction *probInst) {
     Triple init;
-    // TODO
+
+    if (isa<StoreInst>(probInst)) {
+      Value *e0 = probInst->getOperand(1);
+      Value *e1 = probInst->getOperand(0);
+      init.S = getPt(probInst);
+      init.H.push_back(e0);
+      init.M.push_back(e1);
+    } else if(isa<BitCastInst>(probInst)) {
+      // TODO
+    } else if(isa<CallInst>(probInst)) {
+      // TODO
+    }
+
     return init;
   }
 

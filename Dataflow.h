@@ -111,7 +111,7 @@ public:
         return iter->second.end();
       }
 
-  virtual _DOMAIN getTop(int val_cnt) {}
+  virtual _DOMAIN getTop(int val_cnt, Instruction *probInst = NULL) {}
 
   virtual void boundary(_DOMAIN *entry, Function *F) {}
 
@@ -149,7 +149,7 @@ public:
         }
       }
 
-      _DOMAIN bv_init = getTop(val_cnt);
+      _DOMAIN bv_init = getTop(val_cnt, probInst);
 
       int inst = 0;
       int blk = 0;
