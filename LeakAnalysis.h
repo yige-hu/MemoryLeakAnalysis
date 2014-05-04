@@ -56,22 +56,26 @@ public:
 
   virtual void meet(Triple *final, Triple *temp, BasicBlock *curr,
       BasicBlock *last) {
-    //(*final) |= (*temp);
-    // TODO
 
-    for (BasicBlock::iterator i = last->begin(), ie = last->end(); 
-        (i != ie) && (isa<PHINode>(i)); ++i) {
-      for (User::op_iterator OI = i -> op_begin(), OE = i -> op_end();
-          OI != OE; ++OI) {
-        Value *val = *OI;
-        PHINode *p = cast<PHINode>(i);
-        if ((curr == p->getIncomingBlock(*OI))
-            && (isa<Instruction>(val) || isa<Argument>(val))) {
-          //final->set(val_num[val]);
-          // TODO
-        }
+    ValSet newH, newM;
+    final->S.insert(final->S.end(), temp->S.begin(), temp->S.end());
+
+    for (ValSet::iterator it = final->H.begin();
+        it != final->H.end(); ++it) {
+      if (std::find(temp->H.begin(), temp->H.end(), (*it)) != temp->H.end()) {
+        newH.push_back(*it);
       }
     }
+
+    for (ValSet::iterator it = final->M.begin();
+        it != final->M.end(); ++it) {
+      if (std::find(temp->M.begin(), temp->M.end(), (*it)) != temp->M.end()) {
+        newH.push_back(*it);
+      }
+    }
+
+    final->H = newH;
+    final->M = newM;
   }
 
   virtual Triple transfer(Triple temp, Instruction *inst) {

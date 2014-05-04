@@ -10,6 +10,6 @@ CXXFLAGS = -rdynamic $(shell llvm-config --cxxflags) -g -O0 -std=c++11
 	$(CXX) $(CXXFLAGS) -c -I$(ANDERS_INCLUDES) -o $@ $^
 
 %.so: %.o
-	$(CXX) $(CXXFLAGS) -shared -L$(ANDERS_LIB) -lAnders -o $@ $^     # -flat_namespace 
+	$(CXX) $(CXXFLAGS) -shared -L$(ANDERS_LIB) -lAnders -o $@ $^
 clean:
 	rm -f *.o *~ *.so
