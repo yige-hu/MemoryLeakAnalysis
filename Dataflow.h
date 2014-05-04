@@ -115,7 +115,8 @@ public:
 
   virtual void boundary(_DOMAIN *entry, Function *F) {}
 
-  virtual void meet(_DOMAIN *final, _DOMAIN *temp, BasicBlock *curr, BasicBlock *last) {}
+  virtual void meet(_DOMAIN *final, _DOMAIN *temp, BasicBlock *curr,
+      BasicBlock *last) {}
 
   virtual _DOMAIN transfer(_DOMAIN temp, Instruction *inst) {}
 

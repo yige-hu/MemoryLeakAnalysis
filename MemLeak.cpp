@@ -21,15 +21,17 @@ public:
     LeakAnalysis analysis;
 
     // find all leak probing points and start backward dataflow
-#if 0
+#if 1
     for (Function::iterator b = F.begin(), be = F.end(); b != be; ++b) {
       for (BasicBlock::iterator i = b->begin(), ie = b->end(); i != ie; ++i) {
-        analysis.processFunction(F, i);
+        if (isLeakProb(i)) {
+          analysis.processFunction(F, i);
+        }
       }
     }
+#else
+    //analysis.processFunction(F);
 #endif
-
-    analysis.processFunction(F);
 
     LeakAnnotator annot(analysis);
     F.print(errs(), &annot);

@@ -12,12 +12,18 @@ using namespace llvm;
 
 namespace {
 
-typedef struct tuple_t {
+typedef struct triple_t {
   std::vector<Instruction*> S;
   std::vector<Instruction*> H;
   std::vector<Instruction*> M;
-} Tuple;
+} Triple;
 
+
+bool isLeakProb(Instruction *inst) {
+  bool ret = (isa<LoadInst>(inst));
+  //ret = (isa<LoadInst>(inst)) || (isa<BitCast>(inst)) || (isa<>(inst));
+  return ret;
+}
 
 }
 
