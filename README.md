@@ -1,4 +1,4 @@
-assignment3
+Memory Leak Analysis by Contradiction
 ====
 
 Yige Hu
