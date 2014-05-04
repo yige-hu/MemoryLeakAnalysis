@@ -256,6 +256,8 @@ public:
       } // while
     } // if (_DIR)
 
+
+#ifdef _FILL_ITERATOR
     // iterator filling: InstValList & BlkValList insertion
     for (typename std::map<Value*, _DOMAIN>::iterator
         it = inst_in_bv.begin(); it != inst_in_bv.end(); ++it) {
@@ -275,6 +277,7 @@ public:
         }
       }
     }
+#endif
 
   }
 };

@@ -6,6 +6,7 @@
 #ifndef LEAKANALYSIS_H
 #define LEAKANALYSIS_H
 
+#include "Andersen.h"
 #include "MemLeak.h"
 
 using namespace llvm;
@@ -15,17 +16,26 @@ namespace {
 /*
  * Memory-leak analysis.
  */
-class LeakAnalysis : public DataFlowAnalysis<BitVector, BACKWARDS> {
+class LeakAnalysis : public DataFlowAnalysis<Triple, BACKWARDS> {
 public:
 
-  virtual BitVector getTop(int val_cnt) {
-    BitVector bv_init(val_cnt, false);
-    return bv_init;
+  Andersen *anders;
+
+  LeakAnalysis() {}
+  LeakAnalysis(Andersen *ads) {
+    anders = ads;
   }
 
-  virtual void meet(BitVector *final, BitVector *temp, BasicBlock *curr,
+  virtual Triple getTop(int val_cnt) {
+    Triple init;
+    // TODO
+    return init;
+  }
+
+  virtual void meet(Triple *final, Triple *temp, BasicBlock *curr,
       BasicBlock *last) {
-    (*final) |= (*temp);
+    //(*final) |= (*temp);
+    // TODO
 
     for (BasicBlock::iterator i = last->begin(), ie = last->end(); 
         (i != ie) && (isa<PHINode>(i)); ++i) {
@@ -35,21 +45,24 @@ public:
         PHINode *p = cast<PHINode>(i);
         if ((curr == p->getIncomingBlock(*OI))
             && (isa<Instruction>(val) || isa<Argument>(val))) {
-          final->set(val_num[val]);
+          //final->set(val_num[val]);
+          // TODO
         }
       }
     }
   }
 
-  virtual BitVector transfer(BitVector temp, Instruction *inst) {
-    temp.reset(val_num[inst]);
+  virtual Triple transfer(Triple temp, Instruction *inst) {
+    //temp.reset(val_num[inst]);
+    // TODO
 
     if (! isa<PHINode>(inst)) {
       for (User::op_iterator
           OI = inst -> op_begin(), OE = inst -> op_end(); OI != OE; ++OI) {
         Value *val = *OI;
         if (isa<Instruction>(val) || isa<Argument>(val)) {
-          temp.set(val_num[val]);
+          //temp.set(val_num[val]);
+          // TODO
         }
       }
     }
@@ -57,6 +70,7 @@ public:
     return temp;
   }
 
+#if 0
   virtual void blk_in_full_proc(BitVector *final, BitVector *temp, BasicBlock *bb) {
     (*final) = (*temp);
 
@@ -71,6 +85,8 @@ public:
       }
     }
   }
+#endif
+
 };
 
 class LeakAnnotator : public AssemblyAnnotationWriter {

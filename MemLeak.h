@@ -16,6 +16,16 @@ typedef struct triple_t {
   std::vector<Instruction*> S;
   std::vector<Instruction*> H;
   std::vector<Instruction*> M;
+
+  bool operator==(const triple_t& rhs) {
+    bool ret = ((this->S == rhs.S) && (this->H == rhs.H) && (this->M == rhs.M));
+    return ret;
+  }
+
+  bool operator!=(const triple_t& rhs) {
+    return !((*this) == rhs);
+  }
+
 } Triple;
 
 

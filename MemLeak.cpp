@@ -3,7 +3,10 @@
 // Author: Yige Hu
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "llvm/IR/Module.h"
+
 #include "LeakAnalysis.h"
+
 
 using namespace llvm;
 
@@ -12,23 +15,86 @@ namespace {
 /*
  * The memory-leak analysis pass.
  */
+class MemLeak: public ModulePass {
+public:
+  static char ID;
+
+  MemLeak(): ModulePass(ID) {}
+  bool runOnModule(Module &M);
+  void getAnalysisUsage(AnalysisUsage &AU) const {
+    AU.addRequired<Andersen>();
+    AU.setPreservesAll();
+  }
+};
+
+bool MemLeak::runOnModule(Module& M) {
+
+  // run Anderson's analysis to get info
+
+  Andersen& anders = getAnalysis<Andersen>();
+
+  // Print all memory objects (represented by allocation sites)
+  std::vector<const Value*> allocSites;
+  anders.getAllAllocationSites(allocSites);
+
+  errs() << "List of all memobj's allocation site:\n";
+  for (auto const& val: allocSites) {
+    errs() << *val << "\n";
+  }
+  errs() << "\n";
+
+  // For each function, print the points-to set for each pointer it defines
+  for (auto const& f: M)
+  {
+    errs() << "FUNCTION " << f.getName() << "\n";
+    for (auto const& bb: f)
+      for (auto const& inst: bb)
+      {
+        if (!inst.getType()->isPointerTy())
+          continue;
+
+        std::vector<const Value*> ptsSet;
+        // Note that the first argument passed to getPointsToSet() should be
+        // of a pointer type. Otherwise it will always return "I don't know"
+        if (anders.getPointsToSet(&inst, ptsSet))
+        {
+          errs() << inst << "  -->>  ";
+          for (auto const& val: ptsSet)
+            errs() << *val << ", ";
+          errs() << "\n";
+        }
+      }
+    errs() << "\n";
+  }
+
+  // memory-leak detection
+
+  LeakAnalysis analysis(&anders);
+
+  // find all leak probing points, and start backward dataflow
+  for (Module::iterator f = M.begin(), fe = M.end(); f != fe; ++f) {
+    for (Function::iterator b = f->begin(), be = f->end(); b != be; ++b) {
+      for (BasicBlock::iterator i = b->begin(), ie = b->end(); i != ie; ++i) {
+        if (isLeakProb(i)) {
+          analysis.processFunction(*f, i);
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+/*
 class MemLeak : public FunctionPass {
 public:
   static char ID;
   MemLeak() : FunctionPass(ID) {}
 
   virtual bool runOnFunction(Function &F) {
-    LeakAnalysis analysis;
 
-    // find all leak probing points and start backward dataflow
 #if 1
-    for (Function::iterator b = F.begin(), be = F.end(); b != be; ++b) {
-      for (BasicBlock::iterator i = b->begin(), ie = b->end(); i != ie; ++i) {
-        if (isLeakProb(i)) {
-          analysis.processFunction(F, i);
-        }
-      }
-    }
+
 #else
     //analysis.processFunction(F);
 #endif
@@ -37,7 +103,7 @@ public:
     F.print(errs(), &annot);
   }
 };
-
+*/
 
 // LLVM uses the address of this static member to identify the pass, so the
 // initialization value is unimportant.
