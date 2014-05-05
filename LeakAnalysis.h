@@ -103,40 +103,6 @@ public:
 
     return false;
 
-#if 0
-    if (! isa<PHINode>(inst)) {
-      for (User::op_iterator
-          OI = inst -> op_begin(), OE = inst -> op_end(); OI != OE; ++OI) {
-        Value *val = *OI;
-        if (isa<Instruction>(val) || isa<Argument>(val)) {
-          //temp.set(val_num[val]);
-          // TODO
-        }
-      }
-    }
-
-    return temp;
-#endif
-
-  }
-
-#if 0
-  virtual void blk_in_full_proc(BitVector *final, BitVector *temp, BasicBlock *bb) {
-    (*final) = (*temp);
-
-    for (BasicBlock::iterator i = bb->begin(), ie = bb->end(); 
-        (i != ie) && (isa<PHINode>(i)); ++i) {
-      for (User::op_iterator OI = i -> op_begin(), OE = i -> op_end();
-          OI != OE; ++OI) {
-        Value *val = *OI;
-        if (isa<Instruction>(val) || isa<Argument>(val)) {
-          final->set(val_num[val]);
-        }
-      }
-    }
-  }
-#endif
-
 };
 
 
