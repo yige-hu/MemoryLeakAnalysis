@@ -29,21 +29,13 @@ public:
     anders->getAllAllocationSites(allocSites);
   }
 
-  ValSet getPt(Instruction *inst) {
-    assert(inst->getType()->isPointerTy() && "getPt: Inst is not a pointer type!");
-    ValSet ret;
-    assert(anders->getPointsToSet(inst, ret) &&
-        "getPt: cannot get points to set of inst.");
-    return ret;
-  }
-
   virtual Triple getTop(int val_cnt, Instruction *probInst) {
     Triple init;
 
     if (isa<StoreInst>(probInst)) {
       Value *e0 = probInst->getOperand(1);
       Value *e1 = probInst->getOperand(0);
-      init.S = getPt(probInst);
+      init.S = getPt(anders, probInst);
       init.H.push_back(e0);
       init.M.push_back(e1);
     } else if(isa<BitCastInst>(probInst)) {
@@ -58,25 +50,9 @@ public:
   virtual void meet(Triple *final, Triple *temp, BasicBlock *curr,
       BasicBlock *last) {
 
-    ValSet newH, newM;
     final->S.insert(final->S.end(), temp->S.begin(), temp->S.end());
-
-    for (ValSet::iterator it = final->H.begin();
-        it != final->H.end(); ++it) {
-      if (std::find(temp->H.begin(), temp->H.end(), (*it)) != temp->H.end()) {
-        newH.push_back(*it);
-      }
-    }
-
-    for (ValSet::iterator it = final->M.begin();
-        it != final->M.end(); ++it) {
-      if (std::find(temp->M.begin(), temp->M.end(), (*it)) != temp->M.end()) {
-        newH.push_back(*it);
-      }
-    }
-
-    final->H = newH;
-    final->M = newM;
+    final->H = getIntersect(final->H, temp->H);
+    final->M = getIntersect(final->M, temp->M);
   }
 
   virtual bool transfer(Triple *final, Triple temp, Instruction *inst) {
@@ -91,6 +67,7 @@ public:
         return true;
       } else {
         (*final) = cleanup(newTriple);
+        return false;
       }
 
     } else if(isa<BitCastInst>(inst)) {

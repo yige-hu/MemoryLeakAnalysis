@@ -4,13 +4,17 @@ Memory Leak Analysis by Contradiction
 Yige Hu
 
 CS380c final project:
-Memory leak detection.
+Memory leak analysis by contradiction.
+It is a backward dataflow analysis to detect potential memory leakage on heap cells.
 
-Implemented based on the paper:
 
-[Memory leak analysis by contradiction](http://dl.acm.org/citation.cfm?id=2090908)In Proceedings of the 13th international conference on Static Analysis (SAS'06), 2006.
+- An llvm implementation based on the paper:
 
-Program catalog:
+[Memory leak analysis by contradiction](http://dl.acm.org/citation.cfm?id=2090908)
+In Proceedings of the 13th international conference on Static Analysis (SAS'06), 2006.
+
+
+- Program catalog:
 
 Dataflow.h:
   A basic framework for Data-flow analysis.
@@ -20,6 +24,9 @@ FunctionInfo.so:
   Print out the function info.
 MemLeak.cpp:
   The leak pass.
+
+
+- Usage:
 
 1. Compile & prepare for the inputs:
   make
