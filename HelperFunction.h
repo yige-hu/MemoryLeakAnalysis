@@ -12,20 +12,32 @@ using namespace llvm;
 
 namespace {
 
-bool implicitMiss(Instruction* inst, Tupple tup) {
-  return ;
+bool implicitMiss(Instruction* inst, Triple trp) {
+
+  return false;
 }
 
-bool miss(Instruction* inst, Tupple tup) {
+bool miss(Instruction* inst, Triple trp) {
+
+  return false;
+}
+
+bool infeasible(Triple trp) {
+
+  return false;
+}
+
+Triple cleanup(Triple trp) {
 
 }
 
-bool infeasible(Tupple tup) {
+Triple getNewTripleByAssignment(Triple trp, Instruction *inst) {
+  Triple newTriple;
 
-}
+  Value *e0 = inst->getOperand(1);
+  Value *e1 = inst->getOperand(0);
 
-void cleanup(Tupple tup) {
-
+  return newTriple;
 }
 
 }

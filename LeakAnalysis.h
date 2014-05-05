@@ -8,6 +8,7 @@
 
 #include "Andersen.h"
 #include "MemLeak.h"
+#include "HelperFunction.h"
 
 using namespace llvm;
 
@@ -78,10 +79,30 @@ public:
     final->M = newM;
   }
 
-  virtual Triple transfer(Triple temp, Instruction *inst) {
-    //temp.reset(val_num[inst]);
-    // TODO
+  virtual bool transfer(Triple *final, Triple temp, Instruction *inst) {
 
+    Triple newTriple;
+    // TODO: PHINode ?
+
+    if (isa<StoreInst>(inst)) {
+      newTriple = getNewTripleByAssignment(temp, inst);
+
+      if (infeasible(newTriple)) {
+        return true;
+      } else {
+        (*final) = cleanup(newTriple);
+      }
+
+    } else if(isa<BitCastInst>(inst)) {
+      // TODO
+    } else if(isa<CallInst>(inst)) {
+      // TODO
+    }
+
+
+    return false;
+
+#if 0
     if (! isa<PHINode>(inst)) {
       for (User::op_iterator
           OI = inst -> op_begin(), OE = inst -> op_end(); OI != OE; ++OI) {
@@ -94,6 +115,8 @@ public:
     }
 
     return temp;
+#endif
+
   }
 
 #if 0

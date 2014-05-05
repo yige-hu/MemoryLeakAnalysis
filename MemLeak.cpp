@@ -76,7 +76,14 @@ bool MemLeak::runOnModule(Module& M) {
     for (Function::iterator b = f->begin(), be = f->end(); b != be; ++b) {
       for (BasicBlock::iterator i = b->begin(), ie = b->end(); i != ie; ++i) {
         if (isLeakProb(i)) {
-          analysis.processFunction(*f, i);
+          bool retval = analysis.processFunction(*f, i);
+          if (retval) {
+            errs() << "Instruction: " << *i <<
+                " is safe.\n";
+          } else {
+            errs() << "Instruction: " << *i <<
+                " can cause a potential memory leakage.\n";
+          }
         }
       }
     }

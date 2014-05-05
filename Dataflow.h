@@ -118,7 +118,7 @@ public:
   virtual void meet(_DOMAIN *final, _DOMAIN *temp, BasicBlock *curr,
       BasicBlock *last) {}
 
-  virtual _DOMAIN transfer(_DOMAIN temp, Instruction *inst) {}
+  virtual bool transfer(_DOMAIN *final, _DOMAIN temp, Instruction *inst) {}
 
   /*
    * for output purpose only.
@@ -196,7 +196,7 @@ public:
           }
 
           inst_out_bv[&*i] = last;
-          last = transfer(last, &*i);
+          if (transfer(&last, inst_out_bv[&*i], &*i)) return true;
           inst_in_bv[&*i] = last;
         }
 
@@ -239,7 +239,7 @@ public:
           }
 
           inst_in_bv[i] = last;
-          last = transfer(last, i);
+          if (transfer(&last, inst_in_bv[i], i)) return true;
           inst_out_bv[i] = last;
         }
 
@@ -279,6 +279,8 @@ public:
     }
 #endif
 
+    // end of processFunction, return
+    return false;
   }
 };
 
