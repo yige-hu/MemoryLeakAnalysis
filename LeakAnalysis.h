@@ -1,4 +1,4 @@
-// CS380c final project: MemLeakAnalysis.h
+// CS380c final project: LeakAnalysis.h
 // 
 // Author: Yige Hu
 ////////////////////////////////////////////////////////////////////////////////
@@ -6,9 +6,10 @@
 #ifndef LEAKANALYSIS_H
 #define LEAKANALYSIS_H
 
+#include "Dataflow.h"
 #include "Andersen.h"
 #include "MemLeak.h"
-#include "HelperFunction.h"
+
 
 using namespace llvm;
 
@@ -29,13 +30,36 @@ public:
     anders->getAllAllocationSites(allocSites);
   }
 
+
+  // in HelperFunctions.cpp
+  ValSet getPt(const Value *val);
+
+  bool belongsTo(const Value *val, ValSet vs);
+
+  bool intersect(ValSet vs1, ValSet vs2);
+
+  ValSet getIntersect(ValSet vs1, ValSet vs2);
+
+  bool disjoint(const Value *val, ValSet rs);
+
+  bool implicitMiss(const Value *val, Triple trp);
+
+  bool miss(const Value *val, Triple trp);
+
+  bool infeasible(Triple trp);
+
+  Triple cleanup(Triple trp);
+
+  Triple getNewTripleByAssignment(Triple trp, Instruction *inst);
+
+
   virtual Triple getTop(int val_cnt, Instruction *probInst) {
     Triple init;
 
     if (isa<StoreInst>(probInst)) {
       Value *e0 = probInst->getOperand(1);
       Value *e1 = probInst->getOperand(0);
-      init.S = getPt(anders, probInst);
+      init.S = getPt(probInst);
       init.H.push_back(e0);
       init.M.push_back(e1);
     } else if(isa<BitCastInst>(probInst)) {
@@ -115,43 +139,90 @@ public:
 
 };
 
-class LeakAnnotator : public AssemblyAnnotationWriter {
-public:
-  LeakAnalysis &analysis;
 
-  LeakAnnotator(LeakAnalysis &a) : analysis(a) {
-  }
+ValSet LeakAnalysis::getPt(const Value *val) {
+  assert(val->getType()->isPointerTy() && "getPt: val is not a pointer type!");
+  ValSet ret;
+  assert(anders->getPointsToSet(val, ret) &&
+      "getPt: cannot get points to set of val.");
+  return ret;
+}
 
-#if 1
-  virtual void emitBasicBlockStartAnnot(const BasicBlock *bb,
-      formatted_raw_ostream &os) {
-      os << "; ";
-      for(LeakAnalysis::const_iterator iter = analysis.in_begin(bb); 
-          iter != analysis.in_end(bb); ++iter) {
-        os.write_escaped((*iter)->getName());
-        os << ", ";
-      }
-      os << "\n";
-   }
-#endif
 
-#if 1
-  virtual void emitInstructionAnnot(const Instruction *i, formatted_raw_ostream &os) {
-    if (isa<PHINode>(i)) {
-      return;
+bool LeakAnalysis::belongsTo(const Value *val, ValSet vs) {
+  return (std::find(vs.begin(), vs.end(), val) != vs.end());
+}
+
+
+bool LeakAnalysis::intersect(ValSet vs1, ValSet vs2) {
+  for (ValSet::iterator it = vs1.begin(); it != vs1.end(); ++it) {
+    if (belongsTo((*it), vs2)) {
+      return true;
     }
-
-    os << "; ";
-    for(LeakAnalysis::const_iterator iter = analysis.in_begin(i); 
-        iter != analysis.in_end(i); ++iter) {
-      os.write_escaped((*iter)->getName());
-      os << ", ";
-    }
-    os << "\n";
   }
-#endif
+  return false;
+}
 
-};
+
+ValSet LeakAnalysis::getIntersect(ValSet vs1, ValSet vs2) {
+  ValSet new_vs;
+  for (ValSet::iterator it = vs1.begin(); it != vs1.end(); ++it) {
+    if (belongsTo((*it), vs2)) {
+      new_vs.push_back(*it);
+    }
+  }
+  return new_vs;
+}
+
+
+bool LeakAnalysis::disjoint(const Value *val, ValSet rs) {
+  // TODO
+  return false;
+}
+
+
+bool LeakAnalysis::implicitMiss(const Value *val, Triple trp) {
+  bool ret = false;
+  // numerical constant and symbolic addresses
+  ret |= isa<ConstantInt>(val);
+  ret |= isa<ConstantPointerNull>(val);
+  // Invalid expressions
+  // TODO
+  // Lvalue expressions that represent regions outside of the region set S
+  ret |= (! intersect(trp.S, getPt(val)));
+  return ret;
+}
+
+
+bool LeakAnalysis::miss(const Value *val, Triple trp) {
+  return (belongsTo(val, trp.M) || implicitMiss(val, trp));
+}
+
+
+bool LeakAnalysis::infeasible(Triple trp) {
+  for (ValSet::iterator it = trp.H.begin(); it != trp.H.end(); ++it) {
+    if (miss((*it), trp)) {
+      return true;
+    }
+  } 
+  return false;
+}
+
+
+Triple LeakAnalysis::cleanup(Triple trp) {
+
+}
+
+
+Triple LeakAnalysis::getNewTripleByAssignment(Triple trp, Instruction *inst) {
+  Triple newTriple;
+
+  Value *e0 = inst->getOperand(1);
+  Value *e1 = inst->getOperand(0);
+
+  return newTriple;
+}
+
 
 }
 
