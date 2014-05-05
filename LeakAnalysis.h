@@ -40,6 +40,8 @@ public:
 
   ValSet getIntersect(ValSet vs1, ValSet vs2);
 
+  ValSet getMem(const Value *val);
+
   bool disjoint(const Value *val, ValSet rs);
 
   bool implicitMiss(const Value *val, Triple trp);
@@ -59,7 +61,7 @@ public:
     if (isa<StoreInst>(probInst)) {
       Value *e0 = probInst->getOperand(1);
       Value *e1 = probInst->getOperand(0);
-      init.S = getPt(probInst);
+      init.S = getPt(e0);
       init.H.push_back(e0);
       init.M.push_back(e1);
     } else if(isa<BitCastInst>(probInst)) {
@@ -107,6 +109,7 @@ public:
 
 
 ValSet LeakAnalysis::getPt(const Value *val) {
+  //errs() << "getPt: " << *val << '\n';
   assert(val->getType()->isPointerTy() && "getPt: val is not a pointer type!");
   ValSet ret;
   assert(anders->getPointsToSet(val, ret) &&
@@ -140,22 +143,66 @@ ValSet LeakAnalysis::getIntersect(ValSet vs1, ValSet vs2) {
   return new_vs;
 }
 
+ValSet LeakAnalysis::getMem(const Value *val) {
+  ValSet ret;
+
+  // Mem(n) = Mem(a) = O
+  if (isa<ConstantInt>(val) || isa<ConstantPointerNull>(val) ||
+      isa<AllocaInst>(val)) {
+    return ret;
+  }
+
+  // Mem(e.f) = Mem(e)
+  // TODO
+
+  // Mem(*e) = {*e} U Mem(e)
+  if (isa<LoadInst>(val)) {
+    const Instruction *inst = dyn_cast<Instruction>(val);
+    Value *val_addr = inst->getOperand(0);
+    ret = getMem(val_addr);
+    ret.push_back(val);
+  }
+
+  // Mem(e0+e1) = Mem(e0) U Mem(e1)
+  // TODO
+
+}
 
 bool LeakAnalysis::disjoint(const Value *val, ValSet rs) {
-  // TODO
-  return false;
+  ValSet mem = getMem(val);
+  for (ValSet::iterator it = mem.begin(); it != mem.end(); ++it) {
+    if (isa<LoadInst>(*it)) {
+      const Instruction *inst = dyn_cast<Instruction>(*it);
+      Value *e_addr = inst->getOperand(0);
+      if (intersect(getPt(e_addr), rs)) return false;
+    }
+  }
+  return true;
 }
 
 
 bool LeakAnalysis::implicitMiss(const Value *val, Triple trp) {
   bool ret = false;
-  // numerical constant and symbolic addresses
+  // numerical constants
   ret |= isa<ConstantInt>(val);
   ret |= isa<ConstantPointerNull>(val);
+
+  // symbolic addresses
+  ret |= isa<AllocaInst>(val);
+
   // Invalid expressions
   // TODO
+
   // Lvalue expressions that represent regions outside of the region set S
-  ret |= (! intersect(trp.S, getPt(val)));
+  //errs() << "getPt: " << *val << '\n';
+  //assert(val->getType()->isPointerTy() && "getPt: val is not a pointer type!");
+  if (isa<LoadInst>(val)) {
+    const Instruction *inst = dyn_cast<Instruction>(val);
+    Value *val_addr = inst->getOperand(0);
+    assert(val_addr->getType()->isPointerTy() &&
+        "getPt: val_addr is not a pointer type!");
+    ret |= (! intersect(trp.S, getPt(val_addr)));
+  }
   return ret;
 }
 
@@ -190,12 +237,29 @@ Triple LeakAnalysis::cleanup(Triple trp) {
 
 
 Triple LeakAnalysis::getNewTripleByAssignment(Triple trp, Instruction *inst) {
-  Triple newTriple;
+  Triple newTrp;
 
   Value *e0 = inst->getOperand(1);
   Value *e1 = inst->getOperand(0);
 
-  return newTriple;
+  // S' = S U pt(e0)
+  ValSet e0_pt = getPt(e0);
+  newTrp.S = trp.S;
+  for (ValSet::iterator it = e0_pt.begin(); it != e0_pt.end(); ++it) {
+    newTrp.S.push_back(*it);
+  }
+
+  // H'
+  for (ValSet::iterator it = trp.H.begin(); it != trp.H.end(); ++it) {
+    
+  }
+
+  // M'
+  for (ValSet::iterator it = trp.M.begin(); it != trp.M.end(); ++it) {
+
+  }
+
+  return newTrp;
 }
 
 
