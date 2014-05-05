@@ -44,8 +44,8 @@ Usage:
 
 2. Run:
 
-  opt -load ./FunctionInfo.so -function-info pointer1-simp.bc
+  opt -load ./FunctionInfo.so -function-info pointer1.bc
 
-  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./SamplePass.so -sample-pass pointer1.ll > /dev/null
+  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./SamplePass.so -sample-pass pointer1.bc > /dev/null
 
-  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass pointer1-simp.bc
+  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass pointer1.bc > /dev/null

@@ -100,8 +100,8 @@ public:
       // TODO
     }
 
-
     return false;
+  }
 
 };
 
@@ -176,7 +176,16 @@ bool LeakAnalysis::infeasible(Triple trp) {
 
 
 Triple LeakAnalysis::cleanup(Triple trp) {
+  Triple newTrp = trp;
 
+  for (ValSet::iterator it = trp.M.begin(); it != trp.M.end(); ++it) {
+    if (implicitMiss((*it), trp)) {
+      newTrp.M.erase(std::remove(newTrp.M.begin(), newTrp.M.end(), *it),
+          newTrp.M.end());
+    }
+  }
+
+  return newTrp;
 }
 
 
