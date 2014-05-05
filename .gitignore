@@ -26,6 +26,7 @@
 *.ll
 *.so
 *.bak
+*.swp
 
 LiveAnalysis.h
 live.cpp
