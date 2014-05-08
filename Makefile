@@ -24,7 +24,7 @@ MEMLEAK_OBJ= MemLeak.o HelperFunction.o
 #	$(CXX) $(CXXFLAGS) -c -I$(ANDERS_INCLUDES) -o $@ $^
 
 #MemLeak.so: $(MEMLEAK_OBJ)
-#	$(CXX) -fPIC $(CXXFLAGS_STATIC) -shared -L$(ANDERS_LIB) -lAnders -o $@ $^
+#	$(CXX) -fPIC $(CXXFLAGS_STATIC) -shared -L$(ANDERS_LIB) -lAnders -o $@ $(MEMLEAK_OBJ)
 
 clean:
 	rm -f *.o *~ *.so

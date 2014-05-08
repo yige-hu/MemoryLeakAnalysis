@@ -6,9 +6,10 @@
 #ifndef LEAKANALYSIS_H
 #define LEAKANALYSIS_H
 
-#include "Dataflow.h"
-#include "Andersen.h"
-#include "MemLeak.h"
+//#include "Dataflow.h"
+//#include "Andersen.h"
+//#include "MemLeak.h"
+#include "SetOperations.h"
 
 
 using namespace llvm;
@@ -33,15 +34,7 @@ public:
 
   // TODO: move in HelperFunctions.cpp
 
-  Value* getSymAddr(const Value *val);
-
   ValSet getPt(const Value *val);
-
-  bool belongsTo(const Value *val, ValSet vs);
-
-  bool intersect(ValSet vs1, ValSet vs2);
-
-  ValSet getIntersect(ValSet vs1, ValSet vs2);
 
   ValSet getMem(const Value *val);
 
@@ -111,13 +104,6 @@ public:
 };
 
 
-Value* LeakAnalysis::getSymAddr(const Value *val) {
-  assert(isa<LoadInst>(val) && "getSymAddr: val is not a LoadInst!");
-  const Instruction *inst = dyn_cast<Instruction>(val);
-  return inst->getOperand(0);
-}
-
-
 ValSet LeakAnalysis::getPt(const Value *val) {
   //errs() << "getPt: " << *val << '\n';
   assert(val->getType()->isPointerTy() && "getPt: val is not a pointer type!");
@@ -127,31 +113,6 @@ ValSet LeakAnalysis::getPt(const Value *val) {
   return ret;
 }
 
-
-bool LeakAnalysis::belongsTo(const Value *val, ValSet vs) {
-  return (std::find(vs.begin(), vs.end(), val) != vs.end());
-}
-
-
-bool LeakAnalysis::intersect(ValSet vs1, ValSet vs2) {
-  for (ValSet::iterator it = vs1.begin(); it != vs1.end(); ++it) {
-    if (belongsTo((*it), vs2)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-
-ValSet LeakAnalysis::getIntersect(ValSet vs1, ValSet vs2) {
-  ValSet new_vs;
-  for (ValSet::iterator it = vs1.begin(); it != vs1.end(); ++it) {
-    if (belongsTo((*it), vs2)) {
-      new_vs.push_back(*it);
-    }
-  }
-  return new_vs;
-}
 
 ValSet LeakAnalysis::getMem(const Value *val) {
   ValSet ret;
@@ -175,6 +136,7 @@ ValSet LeakAnalysis::getMem(const Value *val) {
   // TODO
 
 }
+
 
 bool LeakAnalysis::disjoint(const Value *val, ValSet rs) {
   ValSet mem = getMem(val);
