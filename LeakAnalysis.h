@@ -51,18 +51,23 @@ public:
   Triple getNewTrpByAssignment(Triple trp, Instruction *inst);
 
 
+
   virtual Triple getTop(int val_cnt, Instruction *probInst) {
     Triple init;
 
     if (isa<StoreInst>(probInst)) {
+      // Assignment
+
       Value *e0 = probInst->getOperand(1);
       Value *e1 = probInst->getOperand(0);
       init.S = getPt(e0);
       init.H.push_back(e0);
       init.M.push_back(e1);
     } else if(isa<BitCastInst>(probInst)) {
+      // Allocations
       // TODO
     } else if(isa<CallInst>(probInst)) {
+      // Deallocations
       // TODO
     }
 
@@ -83,6 +88,8 @@ public:
     // TODO: PHINode ?
 
     if (isa<StoreInst>(inst)) {
+      // 1. Analysis assignments
+
       newTriple = getNewTrpByAssignment(temp, inst);
 
       if (infeasible(newTriple)) {
@@ -93,8 +100,10 @@ public:
       }
 
     } else if(isa<BitCastInst>(inst)) {
+      // 2. Analysis of allocations
       // TODO
     } else if(isa<CallInst>(inst)) {
+      // 3. Analysis of deallocations
       // TODO
     }
 
@@ -162,8 +171,6 @@ bool LeakAnalysis::implicitMiss(const Value *val, Triple trp) {
   // TODO
 
   // Lvalue expressions that represent regions outside of the region set S
-  //errs() << "getPt: " << *val << '\n';
-  //assert(val->getType()->isPointerTy() && "getPt: val is not a pointer type!");
   if (isa<LoadInst>(val)) {
     Value *val_addr = getSymAddr(val);
     assert(val_addr->getType()->isPointerTy() &&
