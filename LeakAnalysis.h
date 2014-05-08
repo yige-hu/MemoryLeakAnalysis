@@ -61,7 +61,11 @@ public:
       Value *e0 = probInst->getOperand(1);
       Value *e1 = probInst->getOperand(0);
       init.S = getPt(e0);
+
+      // Notice that here H stores AllocaInst, thus, symbolic addr instead of
+      // pointer. Corrispondent changes also made in miss() and filter for H.
       init.H.push_back(e0);
+
       init.M.push_back(e1);
     } else if(isa<BitCastInst>(probInst)) {
       // Allocations
@@ -165,7 +169,8 @@ bool LeakAnalysis::implicitMiss(const Value *val, Triple trp) {
   ret |= isa<ConstantPointerNull>(val);
 
   // symbolic addresses
-  ret |= isa<AllocaInst>(val);
+  //ret |= isa<AllocaInst>(val);
+  // store in H AllocaInst
 
   // Invalid expressions
   // TODO
@@ -182,7 +187,18 @@ bool LeakAnalysis::implicitMiss(const Value *val, Triple trp) {
 
 
 bool LeakAnalysis::miss(const Value *val, Triple trp) {
-  return (belongsTo(val, trp.M) || implicitMiss(val, trp));
+  if (isa<AllocaInst>(val)) {
+    // consider that H stores AllocaInst instead of pointer it self
+    for (ValSet::iterator it = trp.M.begin(); it != trp.M.end(); ++it) {
+      if (isa<LoadInst>(*it) && val == getSymAddr(*it)) {
+        return true;
+      }
+    }
+    return false;
+
+  } else {
+    return (belongsTo(val, trp.M) || implicitMiss(val, trp));
+  }
 }
 
 
@@ -226,7 +242,9 @@ Triple LeakAnalysis::getNewTrpByAssignment(Triple trp, Instruction *inst) {
   }
 
   // H' <- H
+  // equivalent for the cases where H stores AllocaInst instead of the pointer
   for (ValSet::iterator it = trp.H.begin(); it != trp.H.end(); ++it) {
+
     // Filter1
     if (disjoint(*it, w)) {
       newTrp.H.push_back(*it);
@@ -247,7 +265,10 @@ Triple LeakAnalysis::getNewTrpByAssignment(Triple trp, Instruction *inst) {
     }
 
     // Filter3
-    if (disjoint(e1, w) && belongsTo(e1, trp.H) && isa<LoadInst>(*it)
+    if (disjoint(e1, w) && isa<LoadInst>(*it)
+        && (belongsTo(e1, trp.H) || 
+          // consider also e1's AllocaInst is stored insdead of itself
+          (isa<LoadInst>(e1)&& belongsTo(getSymAddr(e1), trp.H)))
         && disjoint(getSymAddr(*it), w)) {
       newTrp.H.push_back(*it);
     }
@@ -263,7 +284,9 @@ Triple LeakAnalysis::getNewTrpByAssignment(Triple trp, Instruction *inst) {
   if (isa<LoadInst>(e1)) {
     Value *e1_addr = getSymAddr(e1);
     if (disjoint(e1_addr, w)) {
-      if (belongsTo(e1, trp.H)) {
+      if (belongsTo(e1, trp.H) ||
+          // consider also e1's AllocaInst is stored insdead of itself
+          (isa<LoadInst>(e1) && belongsTo(getSymAddr(e1), trp.H))) {
         newTrp.H.push_back(e1);
       }
 
@@ -275,6 +298,7 @@ Triple LeakAnalysis::getNewTrpByAssignment(Triple trp, Instruction *inst) {
 
   // Subst1
   // TODO
+  // should consider the case where H stores AllocaInst instead of the pointers
 
   // Subst2
   if (disjoint(e0, w) && (! intersect(getPt(e0), trp.S))) {
