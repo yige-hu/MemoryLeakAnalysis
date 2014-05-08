@@ -31,7 +31,7 @@ public:
   }
 
 
-  // in HelperFunctions.cpp
+  // TODO: move in HelperFunctions.cpp
 
   Value* getSymAddr(const Value *val);
 
@@ -264,11 +264,9 @@ Triple LeakAnalysis::getNewTrpByAssignment(Triple trp, Instruction *inst) {
     }
 
     // Filter2
-    if (disjoint(e1, w) && miss(e1, trp) && isa<LoadInst>(*it)) {
-      const Instruction *e_inst = dyn_cast<Instruction>(*it);
-      if (disjoint(getSymAddr(*it), w)) {
-        newTrp.H.push_back(*it);
-      }
+    if (disjoint(e1, w) && miss(e1, trp) && isa<LoadInst>(*it)
+        && disjoint(getSymAddr(*it), w)) {
+      newTrp.H.push_back(*it);
     }
   }
 
@@ -280,10 +278,15 @@ Triple LeakAnalysis::getNewTrpByAssignment(Triple trp, Instruction *inst) {
     }
 
     // Filter3
-    if (disjoint(e1, w) && belongsTo(e1, trp.H) && isa<LoadInst>(*it)) {
-      if (disjoint(getSymAddr(*it), w)) {
-        newTrp.H.push_back(*it);
-      }
+    if (disjoint(e1, w) && belongsTo(e1, trp.H) && isa<LoadInst>(*it)
+        && disjoint(getSymAddr(*it), w)) {
+      newTrp.H.push_back(*it);
+    }
+
+    // Subst2
+    if (disjoint(e0, w) && isa<LoadInst>(*it)
+        && getSymAddr(*it) == e0) {
+      newTrp.M.push_back(e1);
     }
   }
 
@@ -302,8 +305,12 @@ Triple LeakAnalysis::getNewTrpByAssignment(Triple trp, Instruction *inst) {
   }
 
   // Subst1
-  // Subst2
   // TODO
+
+  // Subst2
+  if (disjoint(e0, w) && (! intersect(getPt(e0), trp.S))) {
+    newTrp.M.push_back(e1);
+  }
 
   return newTrp;
 }
