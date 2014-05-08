@@ -1,5 +1,9 @@
 #all: SamplePass.so FunctionInfo.so MemLeak.so
-all: MemLeak.so
+#all: MemLeak.so
+all: samplePass memLeak
+
+samplePass: SamplePass.so
+memLeak: MemLeak.so
 
 ANDERS_DIR=../andersen
 ANDERS_INCLUDES=$(ANDERS_DIR)/include

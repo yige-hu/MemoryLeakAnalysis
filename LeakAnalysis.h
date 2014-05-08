@@ -32,6 +32,9 @@ public:
 
 
   // in HelperFunctions.cpp
+
+  Value* getSymAddr(const Value *val);
+
   ValSet getPt(const Value *val);
 
   bool belongsTo(const Value *val, ValSet vs);
@@ -52,7 +55,7 @@ public:
 
   Triple cleanup(Triple trp);
 
-  Triple getNewTripleByAssignment(Triple trp, Instruction *inst);
+  Triple getNewTrpByAssignment(Triple trp, Instruction *inst);
 
 
   virtual Triple getTop(int val_cnt, Instruction *probInst) {
@@ -87,7 +90,7 @@ public:
     // TODO: PHINode ?
 
     if (isa<StoreInst>(inst)) {
-      newTriple = getNewTripleByAssignment(temp, inst);
+      newTriple = getNewTrpByAssignment(temp, inst);
 
       if (infeasible(newTriple)) {
         return true;
@@ -106,6 +109,13 @@ public:
   }
 
 };
+
+
+Value* LeakAnalysis::getSymAddr(const Value *val) {
+  assert(isa<LoadInst>(val) && "getSymAddr: val is not a LoadInst!");
+  const Instruction *inst = dyn_cast<Instruction>(val);
+  return inst->getOperand(0);
+}
 
 
 ValSet LeakAnalysis::getPt(const Value *val) {
@@ -157,9 +167,7 @@ ValSet LeakAnalysis::getMem(const Value *val) {
 
   // Mem(*e) = {*e} U Mem(e)
   if (isa<LoadInst>(val)) {
-    const Instruction *inst = dyn_cast<Instruction>(val);
-    Value *val_addr = inst->getOperand(0);
-    ret = getMem(val_addr);
+    ret = getMem(getSymAddr(val));
     ret.push_back(val);
   }
 
@@ -172,9 +180,7 @@ bool LeakAnalysis::disjoint(const Value *val, ValSet rs) {
   ValSet mem = getMem(val);
   for (ValSet::iterator it = mem.begin(); it != mem.end(); ++it) {
     if (isa<LoadInst>(*it)) {
-      const Instruction *inst = dyn_cast<Instruction>(*it);
-      Value *e_addr = inst->getOperand(0);
-      if (intersect(getPt(e_addr), rs)) return false;
+      if (intersect(getPt(getSymAddr(*it)), rs)) return false;
     }
   }
   return true;
@@ -197,8 +203,7 @@ bool LeakAnalysis::implicitMiss(const Value *val, Triple trp) {
   //errs() << "getPt: " << *val << '\n';
   //assert(val->getType()->isPointerTy() && "getPt: val is not a pointer type!");
   if (isa<LoadInst>(val)) {
-    const Instruction *inst = dyn_cast<Instruction>(val);
-    Value *val_addr = inst->getOperand(0);
+    Value *val_addr = getSymAddr(val);
     assert(val_addr->getType()->isPointerTy() &&
         "getPt: val_addr is not a pointer type!");
     ret |= (! intersect(trp.S, getPt(val_addr)));
@@ -236,28 +241,69 @@ Triple LeakAnalysis::cleanup(Triple trp) {
 }
 
 
-Triple LeakAnalysis::getNewTripleByAssignment(Triple trp, Instruction *inst) {
+Triple LeakAnalysis::getNewTrpByAssignment(Triple trp, Instruction *inst) {
   Triple newTrp;
+
+  assert(isa<StoreInst>(inst) && "getNewTrpByAssng: inst is not a StoreInst!");
 
   Value *e0 = inst->getOperand(1);
   Value *e1 = inst->getOperand(0);
+  ValSet w = getPt(e0);
 
   // S' = S U pt(e0)
-  ValSet e0_pt = getPt(e0);
   newTrp.S = trp.S;
-  for (ValSet::iterator it = e0_pt.begin(); it != e0_pt.end(); ++it) {
+  for (ValSet::iterator it = w.begin(); it != w.end(); ++it) {
     newTrp.S.push_back(*it);
   }
 
-  // H'
+  // H' <- H
   for (ValSet::iterator it = trp.H.begin(); it != trp.H.end(); ++it) {
-    
+    // Filter1
+    if (disjoint(*it, w)) {
+      newTrp.H.push_back(*it);
+    }
+
+    // Filter2
+    if (disjoint(e1, w) && miss(e1, trp) && isa<LoadInst>(*it)) {
+      const Instruction *e_inst = dyn_cast<Instruction>(*it);
+      if (disjoint(getSymAddr(*it), w)) {
+        newTrp.H.push_back(*it);
+      }
+    }
   }
 
-  // M'
+  // M' <- M
   for (ValSet::iterator it = trp.M.begin(); it != trp.M.end(); ++it) {
+    // Filter1
+    if (disjoint(*it, w)) {
+      newTrp.M.push_back(*it);
+    }
 
+    // Filter3
+    if (disjoint(e1, w) && belongsTo(e1, trp.H) && isa<LoadInst>(*it)) {
+      if (disjoint(getSymAddr(*it), w)) {
+        newTrp.H.push_back(*it);
+      }
+    }
   }
+
+  // Filter4
+  if (isa<LoadInst>(e1)) {
+    Value *e1_addr = getSymAddr(e1);
+    if (disjoint(e1_addr, w)) {
+      if (belongsTo(e1, trp.H)) {
+        newTrp.H.push_back(e1);
+      }
+
+      if (belongsTo(e1, trp.M)) {
+        newTrp.M.push_back(e1);
+      }
+    }
+  }
+
+  // Subst1
+  // Subst2
+  // TODO
 
   return newTrp;
 }
