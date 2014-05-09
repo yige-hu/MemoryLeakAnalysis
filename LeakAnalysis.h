@@ -84,14 +84,12 @@ public:
     final->S.insert(final->S.end(), temp->S.begin(), temp->S.end());
     final->H = getIntersect(final->H, temp->H);
     final->M = getIntersect(final->M, temp->M);
-    final->safe = (final->safe && temp->safe);
   }
 
   virtual bool transfer(Triple *final, Triple temp, Instruction *inst) {
 
     Triple newTriple;
-
-    newTriple.safe = temp.safe;
+    (*final) = temp;
 
     // TODO: PHINode ?
 

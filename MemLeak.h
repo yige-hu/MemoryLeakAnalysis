@@ -18,12 +18,9 @@ typedef struct triple_t {
   ValSet S;
   ValSet H;
   ValSet M;
-  
-  bool safe = false;
 
   bool operator==(const triple_t& rhs) {
-    bool ret = ((this->S == rhs.S) && (this->H == rhs.H) && (this->M == rhs.M)
-        && this->safe == rhs.safe);
+    bool ret = ((this->S == rhs.S) && (this->H == rhs.H) && (this->M == rhs.M));
     return ret;
   }
 
