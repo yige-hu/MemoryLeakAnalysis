@@ -316,9 +316,22 @@ public:
 #endif
 
 
+    // additional_cond: if there is only 1 StoreInst on instProb, safe
+    // additional_cnt = #StoreInst on instProb
+    additional_cnt = 0;
+    for (Function::iterator b = F.begin(), be = F.end(); b != be; ++b) {
+      for (BasicBlock::iterator i = b->begin(), ie = b->end(); i != ie; ++i) {
+        if (isa<StoreInst>(i)) {
+          Value *e0 = i->getOperand(1);
+          if (e0 == cond_inst->getOperand(1)) {
+            additional_cnt ++;
+          }
+        }
+      }
+    }
+
     // additional_cond: if the instProb is the first store, then it is safe
     Value *last_store;
-    additional_cnt = 0;
     BasicBlock *b = &(F.getEntryBlock());
     for (BasicBlock::reverse_iterator i = b->rbegin(), ie = b->rend();
         i != ie; ++i) {
@@ -326,7 +339,6 @@ public:
         Value *e0 = (&*i)->getOperand(1);
         if (e0 == cond_inst->getOperand(1)) {
           last_store = &*i;
-          additional_cnt ++;
         }
       }
     }
