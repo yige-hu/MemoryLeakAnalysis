@@ -4,6 +4,7 @@ Memory Leak Analysis by Contradiction
 Yige Hu
 
 CS380c final project:
+
 Memory leak analysis by contradiction.
 It is a backward dataflow analysis to detect potential memory leakage on heap cells, implemented using LLVM.
 
@@ -37,12 +38,17 @@ Program catalog:
 Usage:
 ----
 
-1. Compile & prepare for the inputs:
+1. Install the Andersen's pointer analysis implemented by Jia:
+
+  [](https://github.com/grievejia/andersen)
+
+2. Compile & prepare for the inputs:
 
   make
+
   ./prepare.sh [c file names]
 
-2. Run:
+3. Run:
 
   opt -load ./FunctionInfo.so -function-info pointer1.bc
 
