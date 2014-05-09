@@ -168,6 +168,8 @@ public:
     // processing using a worklist
     std::set<BasicBlock*> worklist;
 
+    bool started = false;
+
     if (_DIR == BACKWARDS) {
       boundary(&blk_out_bv[--(F.end())], &F);
 
@@ -191,12 +193,22 @@ public:
         _DOMAIN last;
         for (BasicBlock::reverse_iterator i = b->rbegin(), ie = b->rend();
             i != ie; ++i) {
+
           if (i == b->rbegin()) {
             last = blk_out_bv[b];
           }
 
           inst_out_bv[&*i] = last;
-          if (transfer(&last, inst_out_bv[&*i], &*i)) return true;
+
+          if (started || (probInst == NULL)) {
+            if (transfer(&last, inst_out_bv[&*i], &*i)) {
+              errs() << "Contradiction at: " << *i << '\n';
+              return true;
+            }
+          } else if (! started) {
+             if ((&*i) == probInst) started = true;
+          }
+
           inst_in_bv[&*i] = last;
         }
 
