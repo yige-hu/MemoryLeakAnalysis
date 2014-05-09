@@ -85,8 +85,14 @@ class FunctionInfo : public ModulePass {
 
           if (CallInst* callInst = dyn_cast<CallInst>(&*i)) {
             if (callInst->getCalledFunction()->getName() == "malloc") {
-              errs() << "is a malloc().\n";
+              errs() << "\tis a malloc(), arg='" <<
+                *(callInst->getArgOperand(0)) << "'\n";
             }
+            if (callInst->getCalledFunction()->getName() == "free") {
+              errs() << "\tis a free(), arg='" <<
+                *(callInst->getArgOperand(0)) << "'\n";
+            }
+
             if (callMap.count(callInst->getCalledFunction())) {
               callMap[callInst->getCalledFunction()] ++;
 						} else {

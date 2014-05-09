@@ -39,6 +39,8 @@ public:
 
   bool disjoint(const Value *val, ValSet rs);
 
+
+
   // Helper functions:
 
   // 1. Assignment: *x0 <- x1
@@ -59,6 +61,8 @@ public:
   bool unaliasedHit(ValSet w, ValSet H);
 
   Triple getNewTrpByNullAssgn(Triple trp, Instruction *inst);
+
+
 
   // Dataflow virtual functions:
 
@@ -157,8 +161,7 @@ public:
 
             // malloc: (3) top
             // conservatively return a Top here
-            // can just move on and reach the entry
-            }
+            // or can just move on and reach the entry
           }
         }
       }
@@ -180,12 +183,30 @@ public:
         return false;
       }
 
-    } else if(isa<BitCastInst>(inst)) {
-      // 2. Analysis of allocations
-      // TODO
     } else if(isa<CallInst>(inst)) {
-      // 3. Analysis of deallocations
-      // TODO
+      // 3. Analysis of deallocations: free(e)
+      CallInst *callInst = dyn_cast<CallInst>(inst);
+      if (callInst->getCalledFunction()->getName() == "free") {
+        Value *bitCast = callInst->getArgOperand(0);
+        assert(isa<BitCastInst>(bitCast) && "free(): type mismatch");
+        Instruction *bitCastInst = dyn_cast<BitCastInst>(bitCast);
+
+        Value *e = bitCastInst->getOperand(0);
+        assert(isa<LoadInst>(e) && "free(): type mismatch");
+
+        if ((belongsTo(e, temp.H)) || (belongsTo(getSymAddr(e), temp.H))) {
+          // free: (1) contradiction
+          return true;
+
+        } else if (miss(e, temp)) {
+          // free: (2) Miss(e, (S,H,M)), (S,H,M)
+          // *final = temp
+
+        } else {
+          // free: (3), (S,H,M U {e})
+          final->M.push_back(e);
+        }
+      }     
     }
 
     return false;
