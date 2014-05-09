@@ -84,6 +84,9 @@ class FunctionInfo : public ModulePass {
 #endif
 
           if (CallInst* callInst = dyn_cast<CallInst>(&*i)) {
+            if (callInst->getCalledFunction()->getName() == "malloc") {
+              errs() << "is a malloc().\n";
+            }
             if (callMap.count(callInst->getCalledFunction())) {
               callMap[callInst->getCalledFunction()] ++;
 						} else {

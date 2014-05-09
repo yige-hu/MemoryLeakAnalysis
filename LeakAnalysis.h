@@ -56,7 +56,6 @@ public:
     Triple init;
 
     if (isa<StoreInst>(probInst)) {
-      // Assignment
 
       Value *e0 = probInst->getOperand(1);
       Value *e1 = probInst->getOperand(0);
@@ -66,13 +65,32 @@ public:
       // pointer. Corrispondent changes also made in miss() and filter for H.
       init.H.push_back(e0);
 
-      init.M.push_back(e1);
-    } else if(isa<BitCastInst>(probInst)) {
-      // Allocations
-      // TODO
+      // Case #1: assignment, *e0 <- e1
+      if (! isa<BitCastInst>(e1)) {
+        init.M.push_back(e1);
+      }
+
+      // Case #2: allocations, *e0 <- malloc
+      // push nothing into M - implicit miss
+      /*
+      else {
+        BitCastInst *castInst = dyn_cast<BitCastInst>(e1);
+        Value *callOp = castInst->getOperand(0);
+        if (isa<CallInst>(callOp)) {
+          CallInst *callInst = dyn_cast<CallInst>(callOp); 
+          if (callInst->getCalledFunction()->getName() == "malloc") {
+
+          }
+        }
+      }
+      */
+
     } else if(isa<CallInst>(probInst)) {
-      // Deallocations
-      // TODO
+      // Case #3: deallocations, free(e)
+      CallInst *callInst = dyn_cast<CallInst>(probInst);
+      if (callInst->getCalledFunction()->getName() == "free") {
+        // TODO
+      }
     }
 
     return init;
@@ -90,9 +108,6 @@ public:
 
     Triple newTriple;
     (*final) = temp;
-
-    // TODO: PHINode ?
-
 
     if (isa<StoreInst>(inst)) {
       // 1. Analysis assignments
