@@ -83,19 +83,6 @@ public:
       // Case #2: allocations, *e0 <- malloc
       // push nothing into M - implicit miss
 
-      /*
-      if (isa<BitCastInst>(e1)) {
-        BitCastInst *castInst = dyn_cast<BitCastInst>(e1);
-        Value *callOp = castInst->getOperand(0);
-        if (isa<CallInst>(callOp)) {
-          CallInst *callInst = dyn_cast<CallInst>(callOp); 
-          if (callInst->getCalledFunction()->getName() == "malloc") {
-
-          }
-        }
-      }
-      */
-
     } else if(isa<CallInst>(probInst)) {
       // Case #3: deallocations, free(e)
       CallInst *callInst = dyn_cast<CallInst>(probInst);
@@ -169,9 +156,8 @@ public:
             }
 
             // malloc: (3) top
-            {
-              // should return a Top here
-              // TODO
+            // conservatively return a Top here
+            // can just move on and reach the entry
             }
           }
         }
