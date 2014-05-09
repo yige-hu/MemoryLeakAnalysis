@@ -89,6 +89,7 @@ public:
 
     } else if(isa<CallInst>(probInst)) {
       // Case #3: deallocations, free(e)
+      // mainly deal with fields
       CallInst *callInst = dyn_cast<CallInst>(probInst);
       if (callInst->getCalledFunction()->getName() == "free") {
         // TODO

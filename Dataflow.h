@@ -143,6 +143,7 @@ public:
 
     // initialization
     val_cnt = 0;
+    additional_cnt = 0;
 
     {
       for (Function::arg_iterator a = F.arg_begin(), ae = F.arg_end();
