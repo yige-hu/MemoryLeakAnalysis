@@ -34,12 +34,17 @@ public:
 
   // TODO: move in HelperFunctions.cpp
 
+  // General tools:
+
   ValSet getPt(const Value *val);
 
   ValSet getMem(const Value *val);
 
   bool disjoint(const Value *val, ValSet rs);
 
+  // Helper functions:
+
+  // 1. Assignment: *x0 <- x1
   bool implicitMiss(const Value *val, Triple trp);
 
   bool miss(const Value *val, Triple trp);
@@ -50,7 +55,15 @@ public:
 
   Triple getNewTrpByAssignment(Triple trp, Instruction *inst);
 
+  Triple getNewTrpByAssignParams(Triple trp, Value *e0, Value *e1);
 
+  // 2. Malloc(): *x0 <- malloc
+
+  bool unaliasedHit(ValSet w, ValSet H);
+
+  Triple getNewTrpByNullAssgn(Triple trp, Instruction *inst);
+
+  // Dataflow virtual functions:
 
   virtual Triple getTop(int val_cnt, Instruction *probInst) {
     Triple init;
@@ -72,8 +85,9 @@ public:
 
       // Case #2: allocations, *e0 <- malloc
       // push nothing into M - implicit miss
+
       /*
-      else {
+      if (isa<BitCastInst>(e1)) {
         BitCastInst *castInst = dyn_cast<BitCastInst>(e1);
         Value *callOp = castInst->getOperand(0);
         if (isa<CallInst>(callOp)) {
@@ -110,13 +124,69 @@ public:
     (*final) = temp;
 
     if (isa<StoreInst>(inst)) {
-      // 1. Analysis assignments
+
+      Value *e0 = inst->getOperand(1);
+      Value *e1 = inst->getOperand(0);
+
+#if 0
+      // 2. Analysis malloc: *x0 <- malloc
+      if (isa<BitCastInst>(e1)) {
+        BitCastInst *castInst = dyn_cast<BitCastInst>(e1);
+        Value *callOp = castInst->getOperand(0);
+        if (isa<CallInst>(callOp)) {
+          CallInst *callInst = dyn_cast<CallInst>(callOp); 
+          if (callInst->getCalledFunction()->getName() == "malloc") {
+
+            ValSet w = getPt(e0);
+            ValSet H = temp.H;
+
+            // malloc: (1) contradiction
+            if (unaliasedHit(w, H) && disjoint(e0, w)) {
+              for (ValSet::iterator it = H.begin(); it != H.end(); ++it) {
+                if (isa<AllocaInst>(*it) && ((*it) == e0))
+                  return true;
+                if (isa<LoadInst>(*it) && (getSymAddr(*it) == e0))
+                  return true;
+              }
+            }
+
+            // malloc: (2) *e0 <- 0
+            if (unaliasedHit(w, H) || (miss(e0, temp) && disjoint(e0, w))) {
+
+              // additional_cnt = #stores_to_probInst
+              if (e0 == cond_inst->getOperand(1)) {
+                additional_cnt ++;
+              }
+
+              // for assignment: *x0 <- x1 
+              newTriple = getNewTrpByNullAssgn(temp, inst);
+
+              if (infeasible(newTriple)) {
+                return true;
+              } else {
+                (*final) = cleanup(newTriple);
+                return false;
+              }
+
+            }
+
+            // malloc: (3) top
+            {
+              // should return a Top here
+            }
+          }
+        }
+      }
+#endif
+
+      // 1. Analysis assignments: *x0 <- x1
 
       // additional_cnt = #stores_to_probInst
-      if (inst->getOperand(1) == cond_inst->getOperand(1)) {
+      if (e0 == cond_inst->getOperand(1)) {
         additional_cnt ++;
       }
 
+      // for assignment: *x0 <- x1 
       newTriple = getNewTrpByAssignment(temp, inst);
 
       if (infeasible(newTriple)) {
@@ -226,7 +296,8 @@ bool LeakAnalysis::miss(const Value *val, Triple trp) {
         return true;
       }
     }
-    return false;
+    //return false;
+    return (! intersect(trp.S, getPt(val)));
 
   } else {
     return (belongsTo(val, trp.M) || implicitMiss(val, trp));
@@ -259,12 +330,17 @@ Triple LeakAnalysis::cleanup(Triple trp) {
 
 
 Triple LeakAnalysis::getNewTrpByAssignment(Triple trp, Instruction *inst) {
-  Triple newTrp;
-
   assert(isa<StoreInst>(inst) && "getNewTrpByAssng: inst is not a StoreInst!");
 
   Value *e0 = inst->getOperand(1);
   Value *e1 = inst->getOperand(0);
+
+  return getNewTrpByAssignParams(trp, e0, e1);
+}
+
+
+Triple LeakAnalysis::getNewTrpByAssignParams(Triple trp, Value *e0, Value *e1) {
+  Triple newTrp;
   ValSet w = getPt(e0);
 
   // S' = S U pt(e0)
@@ -340,6 +416,32 @@ Triple LeakAnalysis::getNewTrpByAssignment(Triple trp, Instruction *inst) {
   return newTrp;
 }
 
+
+bool LeakAnalysis::unaliasedHit(ValSet w, ValSet H) {
+  // equivalent for the cases where H stores AllocaInst instead of the pointer
+  for (ValSet::iterator it = H.begin(); it != H.end(); ++it) {
+
+    // consider the case where H stores AllocaInst instead of the pointer
+    if (isa<AllocaInst>(*it) && intersect(getPt(*it), w)) return true;
+
+    // the case where the pointer itself is stored
+    if (isa<LoadInst>(*it) && intersect(getPt(getSymAddr(*it)), w)) return true;
+  } 
+
+  return false;
+}
+
+
+Triple LeakAnalysis::getNewTrpByNullAssgn(Triple trp, Instruction *inst) {
+
+  assert(isa<StoreInst>(inst) && "getNewTrpByAssng: inst is not a StoreInst!");
+
+  Value *e0 = inst->getOperand(1);
+  Value *e1 = NULL;
+  //ConstantInt *C = ConstantInt::get(l->getType(), 0);
+
+  return getNewTrpByAssignParams(trp, e0, e1);
+}
 
 }
 
