@@ -50,8 +50,8 @@ Usage:
 
 3. Run:
 
-  opt -load ./FunctionInfo.so -function-info pointer1.bc
+  opt -load ./FunctionInfo.so -function-info testcase1.bc
 
-  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./SamplePass.so -sample-pass pointer1.bc > /dev/null
+  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./SamplePass.so -sample-pass testcase1.bc > /dev/null
 
-  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass pointer1.bc > /dev/null
+  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass testcase1.bc > /dev/null
