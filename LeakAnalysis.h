@@ -6,11 +6,8 @@
 #ifndef LEAKANALYSIS_H
 #define LEAKANALYSIS_H
 
-//#include "Dataflow.h"
-//#include "Andersen.h"
-//#include "MemLeak.h"
+#include "llvm/IR/Type.h"
 #include "SetOperations.h"
-
 
 using namespace llvm;
 
@@ -55,7 +52,7 @@ public:
 
   Triple getNewTrpByAssignment(Triple trp, Instruction *inst);
 
-  Triple getNewTrpByAssignParams(Triple trp, Value *e0, Value *e1);
+  Triple getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1);
 
   // 2. Malloc(): *x0 <- malloc
 
@@ -151,7 +148,6 @@ public:
               }
             }
 
-#if 0
             // malloc: (2) *e0 <- 0
             if (unaliasedHit(w, H) || (miss(e0, temp) && disjoint(e0, w))) {
 
@@ -171,10 +167,11 @@ public:
               }
 
             }
-#endif
+
             // malloc: (3) top
             {
               // should return a Top here
+              // TODO
             }
           }
         }
@@ -336,11 +333,11 @@ Triple LeakAnalysis::getNewTrpByAssignment(Triple trp, Instruction *inst) {
   Value *e0 = inst->getOperand(1);
   Value *e1 = inst->getOperand(0);
 
-  return getNewTrpByAssignParams(trp, e0, e1);
+  return getNewTrpByAssgnParams(trp, e0, e1);
 }
 
 
-Triple LeakAnalysis::getNewTrpByAssignParams(Triple trp, Value *e0, Value *e1) {
+Triple LeakAnalysis::getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1) {
   Triple newTrp;
   ValSet w = getPt(e0);
 
@@ -437,10 +434,9 @@ Triple LeakAnalysis::getNewTrpByNullAssgn(Triple trp, Instruction *inst) {
   assert(isa<StoreInst>(inst) && "getNewTrpByAssng: inst is not a StoreInst!");
 
   Value *e0 = inst->getOperand(1);
-  Value *e1 = NULL;
-  //ConstantInt *C = ConstantInt::get(l->getType(), 0);
+  ConstantInt *e1 = ConstantInt::get(Type::getInt64Ty(inst->getContext()), 0);
 
-  return getNewTrpByAssignParams(trp, e0, e1);
+  return getNewTrpByAssgnParams(trp, e0, e1);
 }
 
 }
