@@ -180,6 +180,7 @@ public:
     std::set<BasicBlock*> worklist;
 
     bool started = false;
+    bool reached_entry = false;
 
     if (_DIR == BACKWARDS) {
       boundary(&blk_out_bv[--(F.end())], &F);
@@ -190,6 +191,7 @@ public:
         worklist.insert(probInst->getParent());
       }
 
+      while_loop:
       while (!worklist.empty()) {
 
         BasicBlock* b = *worklist.begin();
@@ -212,10 +214,13 @@ public:
           inst_out_bv[&*i] = last;
 
           if (started || (probInst == NULL)) {
+            
             if (transfer(&last, inst_out_bv[&*i], &*i)) {
               errs() << "\tContradiction at: '" << *i << "':\n";
-              return true;
+              //return true;
+              goto while_loop;
             }
+
           } else if (! started) {
              if ((&*i) == probInst) started = true;
           }
@@ -228,10 +233,15 @@ public:
 
         // if in[] changed, add predecessors to worklist
         if (in_old != blk_in_bv[b]) {
-          for (pred_iterator PI = pred_begin(b), PE = pred_end(b); PI != PE; ++PI) {
+          for (pred_iterator PI = pred_begin(b), PE = pred_end(b);
+              PI != PE; ++PI) {
             BasicBlock *pred = * PI;
             worklist.insert(pred);
           }
+        }
+
+        if (b == &(F.getEntryBlock())) {
+          reached_entry = true;
         }
       } // while
     } else { // FORWARDS
@@ -271,7 +281,8 @@ public:
 
         // if out[] changed, add successors to worklist
         if (out_old != blk_out_bv[b]) {
-          for (succ_iterator SI = succ_begin(b), SE = succ_end(b); SI != SE; ++SI) {
+          for (succ_iterator SI = succ_begin(b), SE = succ_end(b);
+              SI != SE; ++SI) {
             BasicBlock *succ = * SI;
             worklist.insert(succ);
           }
@@ -306,7 +317,7 @@ public:
     if (additional_cond()) {
       return true;
     }
-    return false;
+    return !(reached_entry);
   }
 };
 
