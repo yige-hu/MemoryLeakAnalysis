@@ -128,7 +128,6 @@ public:
       Value *e0 = inst->getOperand(1);
       Value *e1 = inst->getOperand(0);
 
-#if 0
       // 2. Analysis malloc: *x0 <- malloc
       if (isa<BitCastInst>(e1)) {
         BitCastInst *castInst = dyn_cast<BitCastInst>(e1);
@@ -143,13 +142,16 @@ public:
             // malloc: (1) contradiction
             if (unaliasedHit(w, H) && disjoint(e0, w)) {
               for (ValSet::iterator it = H.begin(); it != H.end(); ++it) {
-                if (isa<AllocaInst>(*it) && ((*it) == e0))
+                if (isa<AllocaInst>(*it) && ((*it) == e0)) {
                   return true;
-                if (isa<LoadInst>(*it) && (getSymAddr(*it) == e0))
+                }
+                if (isa<LoadInst>(*it) && (getSymAddr(*it) == e0)) {
                   return true;
+                }
               }
             }
 
+#if 0
             // malloc: (2) *e0 <- 0
             if (unaliasedHit(w, H) || (miss(e0, temp) && disjoint(e0, w))) {
 
@@ -169,7 +171,7 @@ public:
               }
 
             }
-
+#endif
             // malloc: (3) top
             {
               // should return a Top here
@@ -177,7 +179,6 @@ public:
           }
         }
       }
-#endif
 
       // 1. Analysis assignments: *x0 <- x1
 
@@ -418,14 +419,13 @@ Triple LeakAnalysis::getNewTrpByAssignParams(Triple trp, Value *e0, Value *e1) {
 
 
 bool LeakAnalysis::unaliasedHit(ValSet w, ValSet H) {
-  // equivalent for the cases where H stores AllocaInst instead of the pointer
   for (ValSet::iterator it = H.begin(); it != H.end(); ++it) {
-
     // consider the case where H stores AllocaInst instead of the pointer
-    if (isa<AllocaInst>(*it) && intersect(getPt(*it), w)) return true;
-
+    if (isa<AllocaInst>(*it) && (! intersect(getPt(*it), w)))
+      return true;
     // the case where the pointer itself is stored
-    if (isa<LoadInst>(*it) && intersect(getPt(getSymAddr(*it)), w)) return true;
+    if (isa<LoadInst>(*it) && (! intersect(getPt(getSymAddr(*it)), w)))
+      return true;
   } 
 
   return false;
