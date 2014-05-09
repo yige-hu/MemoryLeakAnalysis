@@ -143,11 +143,6 @@ public:
             // malloc: (2) *e0 <- 0
             if (unaliasedHit(w, H) || (miss(e0, temp) && disjoint(e0, w))) {
 
-              // additional_cnt = #stores_to_probInst
-              if (e0 == cond_inst->getOperand(1)) {
-                additional_cnt ++;
-              }
-
               // for assignment: *x0 <- x1 
               newTriple = getNewTrpByNullAssgn(temp, inst);
 
@@ -169,12 +164,6 @@ public:
 
       // 1. Analysis assignments: *x0 <- x1
 
-      // additional_cnt = #stores_to_probInst
-      if (e0 == cond_inst->getOperand(1)) {
-        additional_cnt ++;
-      }
-
-      // for assignment: *x0 <- x1 
       newTriple = getNewTrpByAssignment(temp, inst);
 
       if (infeasible(newTriple)) {
@@ -214,13 +203,9 @@ public:
   }
 
 
-  virtual bool additional_cond() {
+  virtual bool additional_cond(Value *last_store) {
     // if e0 in probInst is written/load only once, no mem-leak
-    if (additional_cnt == 0) {
-      errs() << "\tOnly load once:\n";
-      return true;
-    }
-    return false;
+    return (last_store == cond_inst) || (additional_cnt <= 1);
   }
 };
 

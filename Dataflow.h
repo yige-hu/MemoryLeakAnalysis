@@ -72,10 +72,9 @@ protected:
   // for output purpose: contains possiblilities from all branches
   std::map<BasicBlock*, _DOMAIN> blk_in_bv_full;
 
-  // additional_cnt: if stored only once, there is no possibility of memory-leak
-  int additional_cnt = 0;
-
+  // store the probInst
   Instruction *cond_inst;
+  int additional_cnt = 0;
 
 public:
 
@@ -133,7 +132,10 @@ public:
     (*final) = (*temp);
   }
 
-  virtual bool additional_cond() {
+  /*
+   * additional condition for returning value
+   */
+  virtual bool additional_cond(Value *val) {
     return false;
   }
 
@@ -143,7 +145,6 @@ public:
 
     // initialization
     val_cnt = 0;
-    additional_cnt = 0;
 
     {
       for (Function::arg_iterator a = F.arg_begin(), ae = F.arg_end();
@@ -314,10 +315,27 @@ public:
     }
 #endif
 
+
+    // additional_cond: if the instProb is the first store, then it is safe
+    Value *last_store;
+    additional_cnt = 0;
+    BasicBlock *b = &(F.getEntryBlock());
+    for (BasicBlock::reverse_iterator i = b->rbegin(), ie = b->rend();
+        i != ie; ++i) {
+      if (isa<StoreInst>(&*i)) {
+        Value *e0 = (&*i)->getOperand(1);
+        if (e0 == cond_inst->getOperand(1)) {
+          last_store = &*i;
+          additional_cnt ++;
+        }
+      }
+    }
+
     // end of processFunction, return
-    if (additional_cond()) {
+    if (additional_cond(last_store)) {
       return true;
     }
+
     return !(reached_entry);
   }
 };
