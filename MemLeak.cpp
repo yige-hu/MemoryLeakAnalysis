@@ -81,8 +81,8 @@ bool MemLeak::runOnModule(Module& M) {
             errs() << "Instruction: " << *i <<
                 " is safe.\n";
           } else {
-            errs() << "Instruction: " << *i <<
-                " can cause a potential memory leakage.\n";
+            errs() << "Instruction: '" << *i <<
+                "' can cause a potential memory leakage.\n";
           }
         }
       }

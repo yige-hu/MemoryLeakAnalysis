@@ -94,6 +94,11 @@ public:
     if (isa<StoreInst>(inst)) {
       // 1. Analysis assignments
 
+      // additional_cnt = #stores_to_probInst
+      if (inst->getOperand(1) == cond_inst->getOperand(1)) {
+        additional_cnt ++;
+      }
+
       newTriple = getNewTrpByAssignment(temp, inst);
 
       if (infeasible(newTriple)) {
@@ -114,6 +119,15 @@ public:
     return false;
   }
 
+
+  virtual bool additional_cond() {
+    // if e0 in probInst is written/load only once, no mem-leak
+    if (additional_cnt == 0) {
+      errs() << "\tOnly load once:\n";
+      return true;
+    }
+    return false;
+  }
 };
 
 

@@ -72,6 +72,11 @@ protected:
   // for output purpose: contains possiblilities from all branches
   std::map<BasicBlock*, _DOMAIN> blk_in_bv_full;
 
+  // additional_cnt: if stored only once, there is no possibility of memory-leak
+  int additional_cnt = 0;
+
+  Instruction *cond_inst;
+
 public:
 
   // iterators
@@ -128,7 +133,13 @@ public:
     (*final) = (*temp);
   }
 
+  virtual bool additional_cond() {
+    return false;
+  }
+
   virtual bool processFunction(Function &F, Instruction* probInst = NULL) {
+
+    cond_inst = probInst;
 
     // initialization
     val_cnt = 0;
@@ -202,7 +213,7 @@ public:
 
           if (started || (probInst == NULL)) {
             if (transfer(&last, inst_out_bv[&*i], &*i)) {
-              errs() << "Contradiction at: " << *i << '\n';
+              errs() << "\tContradiction at: '" << *i << "':\n";
               return true;
             }
           } else if (! started) {
@@ -292,6 +303,9 @@ public:
 #endif
 
     // end of processFunction, return
+    if (additional_cond()) {
+      return true;
+    }
     return false;
   }
 };
