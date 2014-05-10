@@ -283,7 +283,12 @@ ValSet LeakAnalysis::getMem(const Value *val) {
   }
 
   // Mem(e0+e1) = Mem(e0) U Mem(e1)
-  // TODO
+  if (const BinaryOperator *binaryOp = dyn_cast<BinaryOperator>(val)) {
+    ValSet lset = getMem(binaryOp->getOperand(0));
+    ValSet rset = getMem(binaryOp->getOperand(1));
+    ret.insert(lset.begin(), lset.end()); 
+    ret.insert(rset.begin(), rset.end());
+  }
 
   return ret;
 }
@@ -380,9 +385,7 @@ Triple LeakAnalysis::getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1) {
 
   // S' = S U pt(e0)
   newTrp.S = trp.S;
-  for (ValSet::iterator it = w.begin(); it != w.end(); ++it) {
-    newTrp.S.insert(*it);
-  }
+  newTrp.S.insert(w.begin(), w.end());
 
   // H' <- H
   // equivalent for the cases where H stores AllocaInst instead of the pointer
