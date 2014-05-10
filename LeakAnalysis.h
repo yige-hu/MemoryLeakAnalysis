@@ -29,7 +29,7 @@ public:
   }
 
 
-  // TODO: move in HelperFunctions.cpp
+  // TODO: move in HelperFunctions.cpp ?
 
   // General tools:
 
@@ -407,6 +407,11 @@ Triple LeakAnalysis::getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1) {
         && disjoint(getSymAddr(*it), w)) {
       newTrp.H.insert(*it);
     }
+
+    // Subst1
+    if (isa<LoadInst>(*it) && getSymAddr(*it) == e0 && disjoint(*it, w)) {
+      newTrp.H.insert(e1);
+    }
   }
 
   // M' <- M
@@ -417,17 +422,16 @@ Triple LeakAnalysis::getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1) {
     }
 
     // Filter3
-    if (disjoint(e1, w) && isa<LoadInst>(*it)
-        && (belongsTo(e1, trp.H) || 
+    if (disjoint(e1, w) && isa<LoadInst>(*it) &&
+          (belongsTo(e1, trp.H)
           // consider also e1's AllocaInst is stored insdead of itself
-          (isa<LoadInst>(e1)&& belongsTo(getSymAddr(e1), trp.H)))
+          || (isa<LoadInst>(e1) && belongsTo(getSymAddr(e1), trp.H)))
         && disjoint(getSymAddr(*it), w)) {
       newTrp.H.insert(*it);
     }
 
     // Subst2
-    if (disjoint(e0, w) && isa<LoadInst>(*it)
-        && getSymAddr(*it) == e0) {
+    if (disjoint(e0, w) && isa<LoadInst>(*it) && getSymAddr(*it) == e0) {
       newTrp.M.insert(e1);
     }
   }
@@ -449,8 +453,9 @@ Triple LeakAnalysis::getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1) {
   }
 
   // Subst1
-  // TODO
-  // should consider the case where H stores AllocaInst instead of the pointers
+  if ((! intersect(getPt(e0), w)) && belongsTo(e0, trp.H)) {
+    newTrp.H.insert(e1);
+  }
 
   // Subst2
   if (disjoint(e0, w) && (! intersect(getPt(e0), trp.S))) {
