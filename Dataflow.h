@@ -200,9 +200,32 @@ public:
         worklist.erase(b);
         _DOMAIN in_old = blk_in_bv[b];
 
+        // check if contradict on all succ branches
+        // if true, already judged
+        if (blk_out_bv[b].contradict) goto while_loop;
+
         for (succ_iterator SI = succ_begin(b), SE = succ_end(b); SI != SE; ++SI) {
+          // Set true if successors exist: avoid false negative at the exit
+          if (SI == succ_begin(b)) blk_out_bv[b].contradict = true;
           BasicBlock *succ = * SI;
           meet(&blk_out_bv[b], &blk_in_bv[succ], b, succ);
+        }
+
+        if (blk_out_bv[b].contradict) {
+          errs() << "\tContradiction from all coming branches at blk: '"
+              << b->getName() << "':\n";
+          blk_in_bv[b].contradict = true;
+          for (pred_iterator PI = pred_begin(b), PE = pred_end(b);
+              PI != PE; ++PI) {
+            BasicBlock *pred = * PI;
+            if (! blk_out_bv[pred].contradict) worklist.insert(pred);
+          }
+
+          if (b == &(F.getEntryBlock())) {
+            reached_entry = false;
+          }
+
+          goto while_loop;
         }
 
         _DOMAIN last;
@@ -220,12 +243,18 @@ public:
             if (transfer(&last, inst_out_bv[&*i], &*i)) {
               errs() << "\tContradiction at: '" << *i << "':\n";
 
+              last.contradict = true;
+
               // to support: cond(e0 == e1)
               blk_in_bv[b] = last;
               if (in_old != blk_in_bv[b]) {
                 if (BasicBlock *pred = b->getSinglePredecessor()) {
                   worklist.insert(pred);
                 }
+              }
+
+              if (b == &(F.getEntryBlock())) {
+                reached_entry = false;
               }
 
               goto while_loop;

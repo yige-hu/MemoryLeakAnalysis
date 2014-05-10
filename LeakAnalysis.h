@@ -76,6 +76,7 @@ public:
 
   virtual Triple getTop(int val_cnt, Instruction *probInst) {
     Triple init;
+    init.contradict = false;
 
     if (isa<StoreInst>(probInst)) {
 
@@ -113,6 +114,8 @@ public:
     final->S.insert(final->S.end(), temp->S.begin(), temp->S.end());
     final->H = getIntersect(final->H, temp->H);
     final->M = getIntersect(final->M, temp->M);
+
+    final->contradict &= temp->contradict;
   }
 
   virtual bool transfer(Triple *final, Triple temp, Instruction *inst) {
@@ -214,7 +217,6 @@ public:
           //if (cmpInst->isTrueWhenEqual() || cmpInst->isFalseWhenEqual()) {
 
             if (cmpInst->isFalseWhenEqual())
-            errs() << "\tcmpInst=" << *cmpInst << '\t';
 
             newTriple = temp;
             getNewTrpByCond(&newTriple, branchInst, cmpInst);
@@ -502,9 +504,6 @@ void LeakAnalysis::getNewTrpByCond(Triple *trp, BranchInst *branchInst,
 
 void LeakAnalysis::updateTrpByEqual(Triple *trp, Triple trp_succ,
     Value *e0, Value *e1) {
-  //(*trp) = trp_succ;
-
-errs() << "\tinto: updateTrpByEqual\n";
 
   // e0+ => +e1
   if (belongsTo(e0, trp_succ.H) ||
@@ -514,7 +513,6 @@ errs() << "\tinto: updateTrpByEqual\n";
     } else if (isa<LoadInst>(e1)) {
       trp->H.push_back(getSymAddr(e1));
     }
-    errs() << "\tH.push_back(" << *(e1) << '\n';
   }
 
   // e1+ => +e0
@@ -525,28 +523,22 @@ errs() << "\tinto: updateTrpByEqual\n";
     }  else if (isa<LoadInst>(e0)) {
       trp->H.push_back(getSymAddr(e0));
     }
-    errs() << "\tH.push_back(" << *(e0) << '\n';
   }
 
   // e0-- => -e1
   if (miss(e0, trp_succ)) {
     trp->M.push_back(e1);
-    errs() << "\tM.push_back(" << *(e1) << '\n';
   }
 
   // e1-- => -e0
   if (miss(e1, trp_succ)) {
     trp->M.push_back(e0);
-    errs() << "\tM.push_back(" << *(e0) << '\n';
   }
 }
 
 
 void LeakAnalysis::updateTrpByNotEqual(Triple *trp, Triple trp_succ,
     Value *e0, Value *e1) {
-  //(*trp) = trp_succ;
-
-errs() << "\tinto: updateTrpByNotEqual\n";
 
   // e0+ => -e1
   if (belongsTo(e0, trp_succ.H) ||
