@@ -309,14 +309,20 @@ bool LeakAnalysis::implicitMiss(const Value *val, Triple trp) {
   bool ret = false;
   // numerical constants
   ret |= isa<ConstantInt>(val);
-  ret |= isa<ConstantPointerNull>(val);
 
   // symbolic addresses
   //ret |= isa<AllocaInst>(val);
-  // store in H AllocaInst
+  // omit this because in some cases store AllocaInst in H
 
   // Invalid expressions
-  // TODO
+  // null pointer dereference
+  ret |= isa<ConstantPointerNull>(val);
+  // null field accesses
+  if (const GetElementPtrInst *getElmPtrInst = dyn_cast<GetElementPtrInst>(val)) {
+    const Value *ptrObj = getElmPtrInst->getPointerOperand();
+    ret |= isa<ConstantInt>(ptrObj);
+    ret |= isa<ConstantPointerNull>(ptrObj);
+  }
 
   // Lvalue expressions that represent regions outside of the region set S
   if (isa<LoadInst>(val)) {
