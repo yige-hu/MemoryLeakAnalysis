@@ -21,7 +21,8 @@
 *.app
 
 # Project-defined
-./*.c
+*.c
+!microbenchmark/*.c
 *.bc
 *.ll
 *.so

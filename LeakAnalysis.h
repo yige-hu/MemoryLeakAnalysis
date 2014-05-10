@@ -96,10 +96,10 @@ public:
       // Case #2: allocations, *e0 <- malloc
       // push nothing into M - implicit miss
 
-    } else if(isa<CallInst>(probInst)) {
+    } else if(CallInst *callInst = dyn_cast<CallInst>(probInst)) {
       // Case #3: deallocations, free(e)
       // mainly deal with fields
-      CallInst *callInst = dyn_cast<CallInst>(probInst);
+      
       if (callInst->getCalledFunction()->getName() == "free") {
         // TODO
       }
@@ -129,11 +129,11 @@ public:
       Value *e1 = inst->getOperand(0);
 
       // 2. Analysis malloc: *x0 <- malloc
-      if (isa<BitCastInst>(e1)) {
-        BitCastInst *castInst = dyn_cast<BitCastInst>(e1);
+      if (BitCastInst *castInst = dyn_cast<BitCastInst>(e1)) {
+        
         Value *callOp = castInst->getOperand(0);
-        if (isa<CallInst>(callOp)) {
-          CallInst *callInst = dyn_cast<CallInst>(callOp); 
+        if (CallInst *callInst = dyn_cast<CallInst>(callOp)) {
+           
           if (callInst->getCalledFunction()->getName() == "malloc") {
 
             ValSet w = getPt(e0);
@@ -184,9 +184,9 @@ public:
         return false;
       }
 
-    } else if(isa<CallInst>(inst)) {
+    } else if(CallInst *callInst = dyn_cast<CallInst>(inst)) {
       // 3. Analysis of deallocations: free(e)
-      CallInst *callInst = dyn_cast<CallInst>(inst);
+      
       if (callInst->getCalledFunction()->getName() == "free") {
         Value *bitCast = callInst->getArgOperand(0);
         assert(isa<BitCastInst>(bitCast) && "free(): type mismatch");
