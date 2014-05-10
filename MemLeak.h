@@ -36,10 +36,17 @@ typedef struct triple_t {
 
 
 bool isLeakProb(Instruction *inst) {
-  // assignment; malloc
-  bool ret = (isa<StoreInst>(inst));
-  //ret = (isa<StoreInst>(inst)) || (isa<BitCastInst>(inst))
-  //          || ((isa<CallInst>(inst) && 0));
+  bool ret = false;
+  // Case #1: assignment; #2: allocation
+  if (isa<StoreInst>(inst)) {
+    if (isa<PointerType>(inst->getOperand(0)->getType())) {
+      ret = true;
+    }
+  }
+
+  // Case #3: deallocation -- dealing with field pointer lost
+  // Fields of the struct cannot be accessed by name, but only by index.
+  // This information is lacked when compiled with Clang.
   return ret;
 }
 

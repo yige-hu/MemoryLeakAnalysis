@@ -94,25 +94,6 @@ bool MemLeak::runOnModule(Module& M) {
   return false;
 }
 
-/*
-class MemLeak : public FunctionPass {
-public:
-  static char ID;
-  MemLeak() : FunctionPass(ID) {}
-
-  virtual bool runOnFunction(Function &F) {
-
-#if 1
-
-#else
-    //analysis.processFunction(F);
-#endif
-
-    LeakAnnotator annot(analysis);
-    F.print(errs(), &annot);
-  }
-};
-*/
 
 // LLVM uses the address of this static member to identify the pass, so the
 // initialization value is unimportant.

@@ -117,6 +117,12 @@ class FunctionInfo : public ModulePass {
             }
           }
 
+          if (StoreInst *storeInst = dyn_cast<StoreInst>(&*i)) {
+            if (isa<PointerType>(storeInst->getOperand(0)->getType())) { 
+              errs() << "\tstore to a pointer.\n"; 
+            }
+          }
+
         }
       }
     }
