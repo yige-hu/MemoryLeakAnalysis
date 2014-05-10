@@ -219,7 +219,15 @@ public:
             
             if (transfer(&last, inst_out_bv[&*i], &*i)) {
               errs() << "\tContradiction at: '" << *i << "':\n";
-              //return true;
+
+              // to support: cond(e0 == e1)
+              blk_in_bv[b] = last;
+              if (in_old != blk_in_bv[b]) {
+                if (BasicBlock *pred = b->getSinglePredecessor()) {
+                  worklist.insert(pred);
+                }
+              }
+
               goto while_loop;
             }
 

@@ -100,6 +100,14 @@ class FunctionInfo : public ModulePass {
 					  }
           }
 
+          if (BranchInst *branchInst = dyn_cast<BranchInst>(&*i)) {
+            if (branchInst->isConditional()) {
+              errs() << "\tCondition: " << *(branchInst->getCondition()) << '\n';
+              //errs() << "\tsucc 0: " << *(branchInst->getSuccessor(0)) << '\n';
+              //errs() << "\tsucc 1: " << *(branchInst->getSuccessor(1)) << '\n';
+            }
+          }
+
         }
       }
     }

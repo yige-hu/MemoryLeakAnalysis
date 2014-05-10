@@ -33,6 +33,7 @@ bool MemLeak::runOnModule(Module& M) {
 
   Andersen& anders = getAnalysis<Andersen>();
 
+#ifdef _PRINT_PT_INFO
   // Print all memory objects (represented by allocation sites)
   std::vector<const Value*> allocSites;
   anders.getAllAllocationSites(allocSites);
@@ -66,6 +67,7 @@ bool MemLeak::runOnModule(Module& M) {
       }
     errs() << "\n";
   }
+#endif
 
   // memory-leak detection
 
@@ -78,8 +80,8 @@ bool MemLeak::runOnModule(Module& M) {
         if (isLeakProb(i)) {
           bool retval = analysis.processFunction(*f, i);
           if (retval) {
-            errs() << "Instruction: " << *i <<
-                " is safe.\n";
+            errs() << "Instruction: '" << *i <<
+                "' is safe.\n";
           } else {
             errs() << "Instruction: '" << *i <<
                 "' can cause a potential memory leakage.\n";

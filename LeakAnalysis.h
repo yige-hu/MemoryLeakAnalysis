@@ -40,7 +40,6 @@ public:
   bool disjoint(const Value *val, ValSet rs);
 
 
-
   // Helper functions:
 
   // 1. Assignment: *x0 <- x1
@@ -56,11 +55,20 @@ public:
 
   Triple getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1);
 
-  // 2. Malloc(): *x0 <- malloc
+  // 2. Allocation: *x0 <- malloc
 
   bool unaliasedHit(ValSet w, ValSet H);
 
-  Triple getNewTrpByNullAssgn(Triple trp, Instruction *inst);
+  Triple getNewTrpByNullAssgn(Triple trp, StoreInst *inst);
+
+  // 3. Deallocation: free(e)
+
+  // 4. Condition: cond(e0 == e1)
+  void getNewTrpByCond(Triple *trp, BranchInst *branchInst, CmpInst *cmpInst);
+
+  void updateTrpByEqual(Triple *trp, Triple trp_succ, Value *e0, Value *e1);
+
+  void updateTrpByNotEqual(Triple *trp, Triple trp_succ, Value *e0, Value *e1);
 
 
 
@@ -112,7 +120,7 @@ public:
     Triple newTriple;
     (*final) = temp;
 
-    if (isa<StoreInst>(inst)) {
+    if (StoreInst *storeInst = dyn_cast<StoreInst>(inst)) {
 
       Value *e0 = inst->getOperand(1);
       Value *e1 = inst->getOperand(0);
@@ -144,12 +152,12 @@ public:
             if (unaliasedHit(w, H) || (miss(e0, temp) && disjoint(e0, w))) {
 
               // for assignment: *x0 <- x1 
-              newTriple = getNewTrpByNullAssgn(temp, inst);
+              newTriple = getNewTrpByNullAssgn(temp, storeInst);
 
+              (*final) = cleanup(newTriple);
               if (infeasible(newTriple)) {
                 return true;
               } else {
-                (*final) = cleanup(newTriple);
                 return false;
               }
 
@@ -166,10 +174,10 @@ public:
 
       newTriple = getNewTrpByAssignment(temp, inst);
 
+      (*final) = cleanup(newTriple);
       if (infeasible(newTriple)) {
         return true;
       } else {
-        (*final) = cleanup(newTriple);
         return false;
       }
 
@@ -197,6 +205,30 @@ public:
           final->M.push_back(e);
         }
       }     
+    } else if (BranchInst *branchInst = dyn_cast<BranchInst>(inst)) {
+      // 4. Analysis of cond(e0 == e1)
+      if (branchInst->isConditional()) {
+        Value *cond = branchInst->getCondition();
+        if (CmpInst *cmpInst = dyn_cast<CmpInst>(cond)) {
+          if (cmpInst->isCommutative()) {
+          //if (cmpInst->isTrueWhenEqual() || cmpInst->isFalseWhenEqual()) {
+
+            if (cmpInst->isFalseWhenEqual())
+            errs() << "\tcmpInst=" << *cmpInst << '\t';
+
+            newTriple = temp;
+            getNewTrpByCond(&newTriple, branchInst, cmpInst);
+
+            (*final) = cleanup(newTriple);
+            if (infeasible(newTriple)) {
+              return true;
+            } else {
+              return false;
+            }
+
+          }
+        }
+      }
     }
 
     return false;
@@ -422,14 +454,111 @@ bool LeakAnalysis::unaliasedHit(ValSet w, ValSet H) {
 }
 
 
-Triple LeakAnalysis::getNewTrpByNullAssgn(Triple trp, Instruction *inst) {
-
-  assert(isa<StoreInst>(inst) && "getNewTrpByAssng: inst is not a StoreInst!");
-
+Triple LeakAnalysis::getNewTrpByNullAssgn(Triple trp, StoreInst *inst) {
   Value *e0 = inst->getOperand(1);
   ConstantInt *e1 = ConstantInt::get(Type::getInt64Ty(inst->getContext()), 0);
 
   return getNewTrpByAssgnParams(trp, e0, e1);
+}
+
+
+void LeakAnalysis::getNewTrpByCond(Triple *trp, BranchInst *branchInst,
+    CmpInst *cmpInst) {
+
+  Value *e0 = cmpInst->getOperand(0);
+  Value *e1 = cmpInst->getOperand(1);
+
+  BasicBlock *succ_then = branchInst->getSuccessor(0);
+  BasicBlock *succ_else = branchInst->getSuccessor(1);
+
+  Triple trp_then = blk_in_bv[succ_then];
+  Triple trp_else = blk_in_bv[succ_else];
+
+  if (succ_then->getSinglePredecessor()) {
+    // cond(e0 == e1)
+    if (cmpInst->isTrueWhenEqual()) {
+      updateTrpByEqual(trp, trp_then, e0, e1);
+    }
+
+    // cond(e0 != e1)
+    if (cmpInst->isFalseWhenEqual()) {
+      updateTrpByNotEqual(trp, trp_then, e0, e1);
+    }
+  }
+
+  if (succ_else->getSinglePredecessor()) {
+    // cond(e0 == e1)
+    if (cmpInst->isFalseWhenEqual()) {
+      updateTrpByEqual(trp, trp_else, e0, e1);
+    }
+
+    // cond(e0 != e1)
+    if (cmpInst->isTrueWhenEqual()) {
+      updateTrpByNotEqual(trp, trp_else, e0, e1);
+    }
+  }
+}
+
+
+void LeakAnalysis::updateTrpByEqual(Triple *trp, Triple trp_succ,
+    Value *e0, Value *e1) {
+  //(*trp) = trp_succ;
+
+errs() << "\tinto: updateTrpByEqual\n";
+
+  // e0+ => +e1
+  if (belongsTo(e0, trp_succ.H) ||
+      (isa<LoadInst>(e0) && belongsTo(getSymAddr(e0), trp_succ.H))) {
+    if (isa<AllocaInst>(e1)) {
+      trp->H.push_back(e1);
+    } else if (isa<LoadInst>(e1)) {
+      trp->H.push_back(getSymAddr(e1));
+    }
+    errs() << "\tH.push_back(" << *(e1) << '\n';
+  }
+
+  // e1+ => +e0
+  if (belongsTo(e1, trp_succ.H) ||
+     (isa<LoadInst>(e1) && belongsTo(getSymAddr(e1), trp_succ.H))) {
+    if (isa<AllocaInst>(e0)) {
+      trp->H.push_back(e0);
+    }  else if (isa<LoadInst>(e0)) {
+      trp->H.push_back(getSymAddr(e0));
+    }
+    errs() << "\tH.push_back(" << *(e0) << '\n';
+  }
+
+  // e0-- => -e1
+  if (miss(e0, trp_succ)) {
+    trp->M.push_back(e1);
+    errs() << "\tM.push_back(" << *(e1) << '\n';
+  }
+
+  // e1-- => -e0
+  if (miss(e1, trp_succ)) {
+    trp->M.push_back(e0);
+    errs() << "\tM.push_back(" << *(e0) << '\n';
+  }
+}
+
+
+void LeakAnalysis::updateTrpByNotEqual(Triple *trp, Triple trp_succ,
+    Value *e0, Value *e1) {
+  //(*trp) = trp_succ;
+
+errs() << "\tinto: updateTrpByNotEqual\n";
+
+  // e0+ => -e1
+  if (belongsTo(e0, trp_succ.H) ||
+      (isa<LoadInst>(e0) && belongsTo(getSymAddr(e0), trp_succ.H))) {
+    trp->M.push_back(e1);
+  }
+
+  // e1+ => -e0
+  if (belongsTo(e1, trp_succ.H) ||
+      (isa<LoadInst>(e1) && belongsTo(getSymAddr(e1), trp_succ.H))) {
+    trp->M.push_back(e0);
+  }
 }
 
 }

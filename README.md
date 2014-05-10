@@ -46,7 +46,9 @@ Usage:
 
   make
 
-  ./prepare.sh [c file names]
+  ./prepare.sh [c file names (without .c)]
+
+  e.g. ./prepare.sh testcase1
 
 3. Run:
 
