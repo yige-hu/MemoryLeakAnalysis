@@ -508,21 +508,13 @@ void LeakAnalysis::updateTrpByEqual(Triple *trp, Triple trp_succ,
   // e0+ => +e1
   if (belongsTo(e0, trp_succ.H) ||
       (isa<LoadInst>(e0) && belongsTo(getSymAddr(e0), trp_succ.H))) {
-    if (isa<AllocaInst>(e1)) {
       trp->H.push_back(e1);
-    } else if (isa<LoadInst>(e1)) {
-      trp->H.push_back(getSymAddr(e1));
-    }
   }
 
   // e1+ => +e0
   if (belongsTo(e1, trp_succ.H) ||
      (isa<LoadInst>(e1) && belongsTo(getSymAddr(e1), trp_succ.H))) {
-    if (isa<AllocaInst>(e0)) {
       trp->H.push_back(e0);
-    }  else if (isa<LoadInst>(e0)) {
-      trp->H.push_back(getSymAddr(e0));
-    }
   }
 
   // e0-- => -e1
