@@ -12,7 +12,8 @@ using namespace llvm;
 
 namespace {
 
-typedef std::vector<const Value*> ValSet;
+typedef std::set<const Value*> ValSet;
+typedef std::vector<const Value*> ValVector;
 
 typedef struct triple_t {
   ValSet S;

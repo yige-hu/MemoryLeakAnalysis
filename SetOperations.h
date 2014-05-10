@@ -42,7 +42,7 @@ ValSet getIntersect(ValSet vs1, ValSet vs2) {
   ValSet new_vs;
   for (ValSet::iterator it = vs1.begin(); it != vs1.end(); ++it) {
     if (belongsTo((*it), vs2)) {
-      new_vs.push_back(*it);
+      new_vs.insert(*it);
     }
   }
   return new_vs;

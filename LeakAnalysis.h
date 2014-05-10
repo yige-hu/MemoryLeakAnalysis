@@ -20,7 +20,7 @@ class LeakAnalysis : public DataFlowAnalysis<Triple, BACKWARDS> {
 public:
 
   Andersen *anders;
-  ValSet allocSites;
+  ValVector allocSites;
 
   LeakAnalysis() {}
   LeakAnalysis(Andersen *ads) {
@@ -86,11 +86,11 @@ public:
 
       // Notice that here H stores AllocaInst, thus, symbolic addr instead of
       // pointer. Corrispondent changes also made in miss() and filter for H.
-      init.H.push_back(e0);
+      init.H.insert(e0);
 
       // Case #1: assignment, *e0 <- e1
       if (! isa<BitCastInst>(e1)) {
-        init.M.push_back(e1);
+        init.M.insert(e1);
       }
 
       // Case #2: allocations, *e0 <- malloc
@@ -111,7 +111,9 @@ public:
   virtual void meet(Triple *final, Triple *temp, BasicBlock *curr,
       BasicBlock *last) {
 
-    final->S.insert(final->S.end(), temp->S.begin(), temp->S.end());
+    for (ValSet::iterator it = temp->S.begin(); it != temp->S.end(); ++it) {
+      final->S.insert(*it);
+    }
     final->H = getIntersect(final->H, temp->H);
     final->M = getIntersect(final->M, temp->M);
 
@@ -205,7 +207,7 @@ public:
 
         } else {
           // free: (3), (S,H,M U {e})
-          final->M.push_back(e);
+          final->M.insert(e);
         }
       }     
     } else if (BranchInst *branchInst = dyn_cast<BranchInst>(inst)) {
@@ -248,8 +250,14 @@ ValSet LeakAnalysis::getPt(const Value *val) {
   //errs() << "getPt: " << *val << '\n';
   assert(val->getType()->isPointerTy() && "getPt: val is not a pointer type!");
   ValSet ret;
-  assert(anders->getPointsToSet(val, ret) &&
+  ValVector vec;
+  assert(anders->getPointsToSet(val, vec) &&
       "getPt: cannot get points to set of val.");
+
+  for (ValVector::iterator it = vec.begin(); it != vec.end(); ++it) {
+    ret.insert(*it);
+  }
+
   return ret;
 }
 
@@ -271,7 +279,7 @@ ValSet LeakAnalysis::getMem(const Value *val) {
   // Mem(*e) = {*e} U Mem(e)
   if (isa<LoadInst>(val)) {
     ret = getMem(getSymAddr(val));
-    ret.push_back(val);
+    ret.insert(val);
   }
 
   // Mem(e0+e1) = Mem(e0) U Mem(e1)
@@ -348,8 +356,7 @@ Triple LeakAnalysis::cleanup(Triple trp) {
 
   for (ValSet::iterator it = trp.M.begin(); it != trp.M.end(); ++it) {
     if (implicitMiss((*it), trp)) {
-      newTrp.M.erase(std::remove(newTrp.M.begin(), newTrp.M.end(), *it),
-          newTrp.M.end());
+      newTrp.M.erase(*it);
     }
   }
 
@@ -374,7 +381,7 @@ Triple LeakAnalysis::getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1) {
   // S' = S U pt(e0)
   newTrp.S = trp.S;
   for (ValSet::iterator it = w.begin(); it != w.end(); ++it) {
-    newTrp.S.push_back(*it);
+    newTrp.S.insert(*it);
   }
 
   // H' <- H
@@ -383,13 +390,13 @@ Triple LeakAnalysis::getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1) {
 
     // Filter1
     if (disjoint(*it, w)) {
-      newTrp.H.push_back(*it);
+      newTrp.H.insert(*it);
     }
 
     // Filter2
     if (disjoint(e1, w) && miss(e1, trp) && isa<LoadInst>(*it)
         && disjoint(getSymAddr(*it), w)) {
-      newTrp.H.push_back(*it);
+      newTrp.H.insert(*it);
     }
   }
 
@@ -397,7 +404,7 @@ Triple LeakAnalysis::getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1) {
   for (ValSet::iterator it = trp.M.begin(); it != trp.M.end(); ++it) {
     // Filter1
     if (disjoint(*it, w)) {
-      newTrp.M.push_back(*it);
+      newTrp.M.insert(*it);
     }
 
     // Filter3
@@ -406,13 +413,13 @@ Triple LeakAnalysis::getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1) {
           // consider also e1's AllocaInst is stored insdead of itself
           (isa<LoadInst>(e1)&& belongsTo(getSymAddr(e1), trp.H)))
         && disjoint(getSymAddr(*it), w)) {
-      newTrp.H.push_back(*it);
+      newTrp.H.insert(*it);
     }
 
     // Subst2
     if (disjoint(e0, w) && isa<LoadInst>(*it)
         && getSymAddr(*it) == e0) {
-      newTrp.M.push_back(e1);
+      newTrp.M.insert(e1);
     }
   }
 
@@ -423,11 +430,11 @@ Triple LeakAnalysis::getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1) {
       if (belongsTo(e1, trp.H) ||
           // consider also e1's AllocaInst is stored insdead of itself
           (isa<LoadInst>(e1) && belongsTo(getSymAddr(e1), trp.H))) {
-        newTrp.H.push_back(e1);
+        newTrp.H.insert(e1);
       }
 
       if (belongsTo(e1, trp.M)) {
-        newTrp.M.push_back(e1);
+        newTrp.M.insert(e1);
       }
     }
   }
@@ -438,7 +445,7 @@ Triple LeakAnalysis::getNewTrpByAssgnParams(Triple trp, Value *e0, Value *e1) {
 
   // Subst2
   if (disjoint(e0, w) && (! intersect(getPt(e0), trp.S))) {
-    newTrp.M.push_back(e1);
+    newTrp.M.insert(e1);
   }
 
   return newTrp;
@@ -511,23 +518,23 @@ void LeakAnalysis::updateTrpByEqual(Triple *trp, Triple trp_succ,
   // e0+ => +e1
   if (belongsTo(e0, trp_succ.H) ||
       (isa<LoadInst>(e0) && belongsTo(getSymAddr(e0), trp_succ.H))) {
-      trp->H.push_back(e1);
+      trp->H.insert(e1);
   }
 
   // e1+ => +e0
   if (belongsTo(e1, trp_succ.H) ||
      (isa<LoadInst>(e1) && belongsTo(getSymAddr(e1), trp_succ.H))) {
-      trp->H.push_back(e0);
+      trp->H.insert(e0);
   }
 
   // e0-- => -e1
   if (miss(e0, trp_succ)) {
-    trp->M.push_back(e1);
+    trp->M.insert(e1);
   }
 
   // e1-- => -e0
   if (miss(e1, trp_succ)) {
-    trp->M.push_back(e0);
+    trp->M.insert(e0);
   }
 }
 
@@ -538,13 +545,13 @@ void LeakAnalysis::updateTrpByNotEqual(Triple *trp, Triple trp_succ,
   // e0+ => -e1
   if (belongsTo(e0, trp_succ.H) ||
       (isa<LoadInst>(e0) && belongsTo(getSymAddr(e0), trp_succ.H))) {
-    trp->M.push_back(e1);
+    trp->M.insert(e1);
   }
 
   // e1+ => -e0
   if (belongsTo(e1, trp_succ.H) ||
       (isa<LoadInst>(e1) && belongsTo(getSymAddr(e1), trp_succ.H))) {
-    trp->M.push_back(e0);
+    trp->M.insert(e0);
   }
 }
 

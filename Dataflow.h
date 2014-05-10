@@ -200,6 +200,8 @@ public:
         worklist.erase(b);
         _DOMAIN in_old = blk_in_bv[b];
 
+errs() << ">>>>>>>>>>>>>>in blk: " << b->getName() << '\n';
+
         // check if contradict on all succ branches
         // if true, already judged
         if (blk_out_bv[b].contradict) goto while_loop;
