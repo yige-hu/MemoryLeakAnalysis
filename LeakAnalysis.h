@@ -98,10 +98,11 @@ public:
 
     } else if(CallInst *callInst = dyn_cast<CallInst>(probInst)) {
       // Case #3: deallocations, free(e)
-      // mainly deal with fields
+      // deal with fields
       
       if (callInst->getCalledFunction()->getName() == "free") {
-        // TODO
+        // Fields of the struct cannot be accessed by name, but only by index.
+        // This information is lacked when compiled with Clang.
       }
     }
 

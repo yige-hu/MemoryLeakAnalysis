@@ -22,17 +22,21 @@ Program catalog:
 
   A basic framework for Data-flow analysis.
 
+- SetOperations.h:
+
+  Some basic tools for set operations.
+
 - LeakAnalysis.h:
 
   A memory-leak analysis.
 
-- FunctionInfo.so:
-
-  Print out the function info.
-
-- MemLeak.cpp:
+- MemLeak.h & cpp:
 
   The leak pass.
+
+- * FunctionInfo.so:
+
+  A auxiliary and independent tool to print out some function i
 
 
 Usage:
