@@ -39,13 +39,15 @@ class FunctionInfo : public ModulePass {
     for (Module::iterator f = M.begin(), fe = M.end(); f != fe; ++f) {
       errs().write_escaped(f->getName()) << '\n';
       for (Function::iterator b = f->begin(), be = f->end(); b != be; ++b) {
-        errs() << "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>> block :\n";
+        errs() << "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>> block : "
+            << b->getName() << '\n';
         for (BasicBlock::iterator i = b->begin(), ie = b->end(); i != ie; ++i) {
           errs() << *i << '\n';
           
-#if 1
+#if 0
           if (isa<PHINode>(i)) {
-            for (User::op_iterator OI = i -> op_begin(), OE = i -> op_end(); OI != OE; ++OI) {
+            for (User::op_iterator OI = i -> op_begin(), OE = i -> op_end();
+                OI != OE; ++OI) {
               Value *val = *OI;
               PHINode *p = cast<PHINode>(i);
               errs() << "\tbr: " << p->getIncomingBlock(*OI)->getName() << ": ";
@@ -53,7 +55,8 @@ class FunctionInfo : public ModulePass {
               errs() << "op: " << *val;
             }
           } else {
-            for (User::op_iterator OI = i->op_begin(), OE = i-> op_end(); OI != OE; ++OI) {
+            for (User::op_iterator OI = i->op_begin(), OE = i-> op_end();
+                OI != OE; ++OI) {
               Value *val = *OI;
               //errs() << "\top: " << val->getName();
               errs() << "\top: " << *val;
@@ -61,11 +64,12 @@ class FunctionInfo : public ModulePass {
           }
           errs() << '\n';
 #endif
-#if 1
+#if 0
           //if (isa<BranchInst>(i)) {
           if (isa<TerminatorInst>(i)) {
             errs() << "pred:------------\n";
-            for (pred_iterator PI = pred_begin(b), PE = pred_end(b); PI != PE; ++PI) {
+            for (pred_iterator PI = pred_begin(b), PE = pred_end(b);
+                PI != PE; ++PI) {
               //errs() << *(PI->begin()) << '\n';
               BasicBlock *B = * PI;
               errs() << '\t' << *(--(B->end()));
@@ -73,7 +77,8 @@ class FunctionInfo : public ModulePass {
 
             //succ_iterator SI(b), SE(b);
             errs() << "\nsucc:------------\n";
-            for (succ_iterator SI = succ_begin(b), SE = succ_end(b); SI != SE; ++SI) {
+            for (succ_iterator SI = succ_begin(b), SE = succ_end(b);
+                SI != SE; ++SI) {
               //errs() << *(PI->begin()) << '\n';
               BasicBlock *B = * SI;
               errs() << '\t' << *(B->begin());
@@ -98,6 +103,10 @@ class FunctionInfo : public ModulePass {
 						} else {
 							callMap[callInst->getCalledFunction()] = 1;
 					  }
+          }
+
+          if (GetElementPtrInst* getElmPtrInst = dyn_cast<GetElementPtrInst>(&*i)) {
+            errs() << "\tobject: " << *(getElmPtrInst->getPointerOperand()) << '\n';
           }
 
           if (BranchInst *branchInst = dyn_cast<BranchInst>(&*i)) {

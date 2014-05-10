@@ -264,7 +264,9 @@ ValSet LeakAnalysis::getMem(const Value *val) {
   }
 
   // Mem(e.f) = Mem(e)
-  // TODO
+  if (const GetElementPtrInst *getElmPtrInst = dyn_cast<GetElementPtrInst>(val)) {
+    ret = getMem(getElmPtrInst->getPointerOperand());
+  }
 
   // Mem(*e) = {*e} U Mem(e)
   if (isa<LoadInst>(val)) {
@@ -275,6 +277,7 @@ ValSet LeakAnalysis::getMem(const Value *val) {
   // Mem(e0+e1) = Mem(e0) U Mem(e1)
   // TODO
 
+  return ret;
 }
 
 
