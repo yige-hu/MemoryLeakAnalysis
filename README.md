@@ -48,11 +48,11 @@ Usage:
 
 1. Install the Andersen's pointer analysis implemented by Jia:
 
-  [grievejia/andersen](https://github.com/grievejia/andersen)
+  [https://github.com/grievejia/andersen](https://github.com/grievejia/andersen)
 
 2. Compile & prepare for the inputs:
 
-  make
+  make memLeak
 
   ./prepare.sh [c file names (without .c)]
 
@@ -60,8 +60,12 @@ Usage:
 
 3. Run:
 
+  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass testcase1.bc > /dev/null
+
+  *  For reference:
+
   opt -load ./FunctionInfo.so -function-info testcase1.bc
 
   opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./SamplePass.so -sample-pass testcase1.bc > /dev/null
 
-  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass testcase1.bc > /dev/null
+

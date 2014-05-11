@@ -1,5 +1,3 @@
-#all: SamplePass.so FunctionInfo.so MemLeak.so
-#all: MemLeak.so
 all: samplePass memLeak functionInfo
 
 samplePass: SamplePass.so
