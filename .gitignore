@@ -33,6 +33,8 @@
 *.swp
 
 # Latex
+*.bbl
+*.blg
 *.aux
 *.log
 *.dvi

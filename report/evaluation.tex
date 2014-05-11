@@ -1,2 +1,78 @@
 \section{Evaluation}
 \label{s:evaluation}
+
+We evaluate the correctness of the analysis using a set of six categories of 
+microbenchmarks comprised of small program pieces, and a set of benchmarks 
+from the GNU C Library source code~\cite{glibc}.
+
+\subsection{Microbenchmarks}
+\label{microbenchmark}
+
+There are 6 set of microbenchmarks. The first 4 sets are used to check the 
+correctness of the analysis on 4 categories of statements being analyzed. 
+The 5th is for evaluation on structure type. And the 6th is a realistic 
+function for the linked-list.
+
+%\begin{itemize}
+%  \item 1\_assignment: assignment statements of form: $*x_0\gets x_1$;
+%  \item 2\_malloc: allocation statements of form: $*x_0\gets malloc()$;
+%  \item 3\_free: deallocation statements of form: $free(e)$;
+%  \item 4\_cond: conditions of form: $cond(e_0\equiv e_1)$;
+%  \item 5\_struct: analysis on fields in structure types;
+%  \item 6\_data\_structure: a realistic function for linked-list.
+%\end{itemize}
+
+
+\begin{table}[t!]
+  \centering
+    %\setlength{\tabcolsep}{2pt}
+    %\def\arraystretch{.8}
+    \begin{tabular}{|l|l|}
+    \hline
+    Microbenchmark set & description\\
+    \hline
+    \hline
+    1\_assignment & assignment statements of form: $*x_0\gets x_1$ \\
+    \hline
+    2\_malloc & allocation statements of form: $*x_0\gets malloc()$ \\
+    \hline
+    3\_free & deallocation statements of form: $free(e)$ \\
+    \hline
+    4\_cond & conditions of form: $cond(e_0\equiv e_1)$ \\
+    \hline
+    5\_struct & analysis on fields in structure types \\
+    \hline
+    6\_data\_structure & a realistic function for linked-list \\
+    \hline
+    \end{tabular}
+    \caption{\label{tbl:micro} Description on microbenchmarks}
+\label{tbl:microbenchmark}
+\end{table}
+
+
+The analysis discovers all potential memory leak for the above microbenchmarks 
+with no false negative and false positive.
+
+
+\subsection{Benchmarks}
+\label{benchmarks}
+
+The benchmarks is composed of two C programs taken from the GNU C Library 
+source code~\cite{glibc}. For the convenience concern, the C programs selected 
+are those can be compiled by clang as an independent C program without other
+dependencies. They are two atest programs in the GNU C math package:
+
+\begin{itemize}
+  \item glibc\_math/atest-exp.c
+  \item libc\_math/atest-sincos.c
+\end{itemize}
+
+No false positive are reported for the above two programs using our memory leak 
+analysis. \\ \\
+
+Two other GNU C Libray programs used for cryptograph (in the folder "glibc\_crypt" 
+is also tested, but throws assertion errors in the Andersen's 
+Analysis~\cite{jia}. \\ \\
+
+Due to the time constraint, we have not found enough large pieces of standard C 
+library codes that are suitable for the test.
