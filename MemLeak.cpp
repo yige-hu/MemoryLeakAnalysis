@@ -80,11 +80,9 @@ bool MemLeak::runOnModule(Module& M) {
         if (isLeakProb(i)) {
           bool retval = analysis.processFunction(*f, i);
           if (retval) {
-            errs() << "Instruction: '" << *i <<
-                "' is safe.\n";
+            errs() << "'" << *i << "' is safe.\n";
           } else {
-            errs() << "Instruction: '" << *i <<
-                "' can cause a potential memory leakage.\n";
+            errs() << "'" << *i << "' can cause a potential memory leakage.\n";
           }
         }
       }

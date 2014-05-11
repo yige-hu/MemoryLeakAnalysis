@@ -23,6 +23,9 @@
 # Project-defined
 *.c
 !microbenchmark/*.c
+!microbenchmark/*/*.c
+!benchmark/*.c
+!benchmark/*/*.c
 *.bc
 *.ll
 *.so

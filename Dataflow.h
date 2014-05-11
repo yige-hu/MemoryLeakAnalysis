@@ -183,6 +183,7 @@ public:
 
     bool started = false;
     bool reached_entry = false;
+    int num_blk_proc = 0;
 
     if (_DIR == BACKWARDS) {
       boundary(&blk_out_bv[--(F.end())], &F);
@@ -200,6 +201,8 @@ public:
         worklist.erase(b);
         _DOMAIN in_old = blk_in_bv[b];
 
+        num_blk_proc ++;
+
         // check if contradict on all succ branches
         // if true, already judged
         if (blk_out_bv[b].contradict) goto while_loop;
@@ -213,7 +216,7 @@ public:
 
         if (blk_out_bv[b].contradict) {
           errs() << "\tContradiction from all coming branches at blk: '"
-              << b->getName() << "':\n";
+              << b->getName() << "'.\n";
           blk_in_bv[b].contradict = true;
           for (pred_iterator PI = pred_begin(b), PE = pred_end(b);
               PI != PE; ++PI) {
@@ -241,9 +244,14 @@ public:
           if (started || (probInst == NULL)) {
             
             if (transfer(&last, inst_out_bv[&*i], &*i)) {
-              errs() << "\tContradiction at: '" << *i << "':\n";
+              errs() << "\tContradiction at: '" << *i << "'.\n";
 
               last.contradict = true;
+
+              if (num_blk_proc <= 1) {
+                errs() << "\tMeet contradiction in the same BasicBlock.\n";
+                return true;
+              }
 
               // to support: cond(e0 == e1)
               blk_in_bv[b] = last;
