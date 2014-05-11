@@ -34,9 +34,13 @@ Program catalog:
 
   The leak pass.
 
-- * FunctionInfo.so:
+- * FunctionInfo.cpp:
 
-  A auxiliary and independent tool to print out some function i
+  An auxiliary and independent tool to print out some function i
+
+- * SamplePass.cpp:
+
+  An auxiliary and independent tool to show the usage of the Andersen's analysis. Provided by Jia (grievejia).
 
 
 Usage:
@@ -44,7 +48,7 @@ Usage:
 
 1. Install the Andersen's pointer analysis implemented by Jia:
 
-  [](https://github.com/grievejia/andersen)
+  [grievejia/andersen](https://github.com/grievejia/andersen)
 
 2. Compile & prepare for the inputs:
 
