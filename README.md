@@ -11,7 +11,7 @@ It is a backward dataflow analysis to detect potential memory leakage on heap ce
 References:
 ----
 
-[Memory leak analysis by contradiction](http://dl.acm.org/citation.cfm?id=2090908)
+[Memory leak analysis by contradiction](http://dl.acm.org/citation.cfm?id=2090908)  
 In Proceedings of the 13th international conference on Static Analysis (SAS'06), 2006.
 
 
@@ -56,7 +56,7 @@ Usage:
 
   ./prepare.sh [c file names (without .c)]
 
-  e.g. ./prepare.sh testcase1
+  e.g. ./prepare.sh microbenchmark/1\_assignment/testcase1
 
 3. Run:
 
