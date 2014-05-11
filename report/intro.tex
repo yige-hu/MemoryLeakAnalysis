@@ -1,0 +1,33 @@
+\section{Introduction}
+Memory leak is a standard cause of errors in low-level programming languages
+such as C and C++. Those languages provide manual memory management and require
+explicit deallocation of structures. The category of errors can eventually
+causes a system to run our of memory, and is difficult to identify. \\ \\
+
+We describe a LLVM~\cite{llvm} implementation on an analysis which
+can detect a set of errors caused by the memory leak. The implementation is
+based on the algorithm proposed by Orlovich and Rugina~\cite{rugina}. \\ \\
+
+In this implementation we analysis and detect the potential memory leak error
+by checking whether a statement can cause a potential loss of reference to a 
+heap cell. The definition of a leaked (eroor) cell is given~\cite{rugina} as: the 
+program or the run-time system doesn't reclaim its memory when the lifetime 
+has ended. \\ \\
+
+The analysis works as a backward Dataflow analysis. For each statement that 
+can cause a potential loss of heap cell reference, the analysis assume that 
+it causes a loss of the last reference to the cell, and thus, an error cell
+is formed. The analysis then release a detection probe to starts a backward 
+Dataflow analysis from that programming point. If a contradiction is formed 
+and the analysis reaches a bottom, the probe statement is proved to be safe. 
+Otherwise, if the analysis reaches a top, or it reaches the program entry, 
+a warning of potential memory leak is released. \\ \\
+
+Section~\ref{s:algorithm} introduces the syntax, notations and algorithm
+used by this implementation. 
+
+The evaluation~\ref{s:evaluation} is done through benchmarking. A set of 6 kinds
+of microbenchmarks is used to show the correctness on different categories of
+statements being analyzed. Then, two C programs from GNU C Library source
+code~\cite{glibc} are used to evaluate the performance on larger programs. No 
+false positive are shown in the two GNU C programs.

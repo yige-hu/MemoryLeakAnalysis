@@ -6,13 +6,16 @@ Yige Hu
 CS380c final project:
 
 Memory leak analysis by contradiction.
-It is a backward dataflow analysis to detect potential memory leakage on heap cells, implemented using LLVM.
+It is an intra-procedural backward dataflow analysis to detect potential memory leakage on heap cells, implemented using LLVM.
+
 
 References:
 ----
 
 [Memory leak analysis by contradiction](http://dl.acm.org/citation.cfm?id=2090908)  
 In Proceedings of the 13th international conference on Static Analysis (SAS'06), 2006.
+
+The paper describes a backward dataflow analysis for both intra- and inter-procedual analysis. Due to the time constraint, only the intra-procedual analysis is implemented in this work.
 
 
 Program catalog:

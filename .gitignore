@@ -32,6 +32,13 @@
 *.bak
 *.swp
 
+# Latex
+*.aux
+*.log
+*.dvi
+*.ps
+*.pdf
+
 LiveAnalysis.h
 live.cpp
 

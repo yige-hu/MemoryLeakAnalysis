@@ -12,17 +12,8 @@ all: $(OUT_PDF)
 .PHONY: all clean public
 
 $(OUT_PDF): $(DEPS)
-	rubber -vv -pd osdi14gpunet
-	@grep --color undefined osdi14gpunet.log && notify-send --urgency=critical "WARNING: UNDEFINED REF" || true
-
-public: 
-	sed -i 's/publicversion}{false/publicversion}{true/' osdi14gpunet.tex
-	rubber -vv -pd osdi14gpunet
-	cp $(OUT_PDF) osdi14gpunet_submitted.pdf
-	sed -i 's/publicversion}{true/publicversion}{false/' osdi14gpunet.tex
-	rubber -vv -pd osdi14gpunet
-	sha1sum osdi14gpunet_submitted.pdf
-	@notify-send --urgency=critical `sha1sum osdi14gpunet_submitted.pdf`
+	rubber -vv -pd memLeak
+	@grep --color undefined memLeak.log && notify-send --urgency=critical "WARNING: UNDEFINED REF" || true
 
 clean:
-	rubber -v -pd --clean osdi14gpunet
+	rubber -v -pd --clean memLeak

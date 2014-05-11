@@ -1,0 +1,40 @@
+\documentclass[12pt]{article}
+\usepackage{sectsty}
+\usepackage{url}
+\usepackage{enumitem}
+\pagestyle{myheadings}
+\markright{CS380C Compilers\\ Course Project Report}
+
+\title{\bf \Large Implimentation on a Memry Leak Analysis by Contradiction}
+\author{\normalsize Yige Hu (yh66596)}
+%\date{\normalsize \today}
+\date{}
+
+\sectionfont{\fontsize{14}{17}\selectfont}
+
+\begin{document}
+\maketitle
+
+\pagenumbering{arabic}
+
+This report describes an implementation based on the algorithm proposed by
+Orlovich and Rugina\cite{rugina}. The paper discusses on both intra- and
+inter- procedural analysis. Due to the time constraint, only the
+intra-procedual analysis is implemented in this work.\\ \\
+
+%\input{abstract}
+\input{intro}
+%\input{motivation}
+\input{algorithm}
+%\input{implementation}
+\input{evaluation}
+%\input{related}
+%\input{conclusions}
+%\input{acknowledgements}
+\input{conferences}
+
+\footnotesize
+\bibliographystyle{abbrv}
+\bibliography{bibliography}
+
+\end{document}

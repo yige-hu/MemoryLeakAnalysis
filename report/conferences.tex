@@ -1,0 +1,137 @@
+% Conference macros
+% include this in enclosing document for long conference names
+\def\longconferencenames{}
+
+%  Use this one for the cv notes
+%\def\includecvnotes{}
+%\def\includebionotes{}
+
+\newcommand{\osaconfname}[3]{
+\ifx\longconferencenames\undefined
+\newcommand{#1}[0]{{#2}}
+\else
+\newcommand{#1}[0]{{#3}}
+\fi
+}
+
+\newcommand{\cvnote}[1]{
+\ifx\includecvnotes\undefined
+%
+\else
+{#1}%
+\fi
+}
+
+
+\newcommand{\bionote}[1]{
+\ifx\includebionotes\undefined
+%
+\else
+{#1}%
+\fi
+}
+
+
+\osaconfname{\sas}{SAS'06}{Proceedings of the 13th International Conference
+on Static Analysis (SAS'06)}
+
+\osaconfname{\podc}{PODC}{Proceedings of the ACM symposium on Principles of
+distributed computing (PODC)}
+
+\osaconfname{\asplos}{ASPLOS}{{Proceedings of the ACM International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS)}}
+
+\osaconfname{\spaa}{SPAA}{{Proceedings of the ACM symposium on Parallelism in algorithms and architectures (SPAA)}}
+
+\osaconfname{\osdi}{OSDI}{{Proceedings of the USENIX Symposium on Operating Systems Design and Implementation (OSDI)}}
+
+\osaconfname{\disc}{DISC}{{Proceedings of the International Conference on Distributed Computing (DISC)}}
+
+\osaconfname{\usenixatc}{USENIX}{{Proceedings of the USENIX Annual Technical Conference}}
+\osaconfname{\usenixsec}{USENIX Security}{{Proceedings of the USENIX Security Symposium}}
+
+\osaconfname{\pldi}{PLDI}{{Proceedings of the ACM SIGPLAN conference on Programming language design and implementation (PLDI)}}
+
+\osaconfname{\computer}{Computer}{{IEEE Computer}}
+
+\osaconfname{\sosp}{SOSP}{{Proceedings of the ACM SIGOPS Symposium on Operating Systems Principles (SOSP)}}
+
+\osaconfname{\isca}{ISCA}{{Proceedings of the ACM IEEE International Symposium on Computer Architecture (ISCA)}}
+
+\osaconfname{\csaw}{CSAW}{{Proceedings of the ACM Workshop on Computer Security Architecture (CSAW)}}
+
+\osaconfname{\wddd}{WDDD}{{Proceedings of the Workshop on Duplicating, Deconstructing, and Debunking (WDDD)}}
+
+\osaconfname{\vldb}{VLDB}{{Proceedings of the International Conference on Very Large Databases (VLDB)}}
+
+\osaconfname{\toplas}{TOPLAS}{{ACM Transactions on Programming Languages and Systems (TOPLAS)}}
+
+\osaconfname{\tocs}{TOCS}{{ACM Transactions on Computer Systems (TOCS)}}
+
+\osaconfname{\ppopp}{{PPoPP}}{{Proceedings of the ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming (PPoPP)}}
+
+\osaconfname{\jpdc}{J. Parallel Distrib. Comput.}{{Journal of Parallel and Distributed Computing}}
+
+\osaconfname{\ismm}{ISMM}{{Proceedings of the ACM International Symposium on Memory Management (ISMM)}}
+
+\osaconfname{\cacm}{CACM}{{Communications of the ACM (CACM)}}
+
+\osaconfname{\hpca}{HPCA}{{Proceedings of the IEEE International Symposium on High-Performance Computer Architecture (HPCA)}}
+
+\osaconfname{\transact}{TRANSACT}{{Proceedings of the ACM SIGPLAN Workshop on Transactional Computing (TRANSACT)}}
+
+\osaconfname{\iiswc}{IISWC}{{Proceedings of the IEEE International Symposium on Workload Characterization (IISWC)}}
+
+\osaconfname{\tpds}{IEEE Trans, Parallel Distrib. Syst.}{{IEEE Transactions on Parallel and Distributed Systems}}
+
+\osaconfname{\osr}{OSR}{{ACM Operating Systems Review}}
+
+\osaconfname{\nsdi}{NSDI}{{Proceedings of the USENIX Symposium on Networked Systems Design and Implementation (NSDI)}}
+
+\osaconfname{\cc}{CC}{{Proceedings of the International Conference on Compiler Construction (CC)}}
+
+\osaconfname{\surveys}{ACM Comput. Surv.}{{ACM Computing Surveys}}
+\osaconfname{\icde}{IDCE}{{Proceedings of the IEEE International Conference on Data Engineering (ICDE)}}
+\osaconfname{\fast}{FAST}{{Proceedings of the USENIX Conference on File and Storage Technologies (FAST)}}
+\osaconfname{\eurosys}{{E}uro{S}ys}{{Proceedings of the ACM European Conference on Computer Systems ({E}uro{S}ys)}}
+\osaconfname{\hotos}{HotOS}{{Proceedings of the USENIX Workshop on Hot Topics in Operating Systems (HotOS)}}
+\osaconfname{\oopsla}{OOPSLA}{{Proceedings of the ACM SIGPLAN Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA)}}
+\osaconfname{\ndss}{NDSS}{{Proceedings of the Network and Distributed System Security Symposium (NDSS)}}
+\osaconfname{\oakland}{Oakland}{{Proceedings of the IEEE Symposium on Security and Privacy (Oakland)}}
+\osaconfname{\ispass}{ISPASS}{{Proceedings of the IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS)}}
+
+\osaconfname{\europar}{{E}uro{P}ar}{{Proceedings of the European Conference on Parallel Programming ({E}uro{P}ar)}}
+
+\osaconfname{\sigcse}{{SIGCSE}}{{Proceedings of the ACM SIGCSE technical symposium on Computer science education (SIGCSE)}}
+
+\osaconfname{\ccs}{{CCS}}{{Proceedings of the ACM Conference on Computer and Communications Security (CCS)}}
+
+\osaconfname{\veeconf}{{VEE}}{{Proceedings of the International Conference on Virtual Execution Environments (VEE)}}
+
+\osaconfname{\lisa}{{LISA}}{{Proceedings of the Large Installation System Administration Conference (LISA)}}
+
+\osaconfname{\sac}{{SAC}}{{Proceedings of the ACM Symposium on Applied computing (SAC)}}
+
+\osaconfname{\acsac}{{ACSAC}}{{Proceedings of the Annual Computer Security Applications Conference (ACSAC)}}
+
+\osaconfname{\sacmat}{SACMAT}{{Proceedings of the ACM Symposium on Access Control Models and Technologies (SACMAT)}}
+\osaconfname{\hotsec}{HotSec}{{Proceedings of the USENIX Workshop on
+    Hot Topics in Security (HotSec)}}
+\osaconfname{\hotnets}{HotNets}{{Proceedings of the ACM Workshop on Hot
+    Topics in Networks (HotNets)}}
+\osaconfname{\stc}{STC}{{Proceedings of the ACM workshop on Scalable Trusted Computing (STC)}}
+\osaconfname{\tissec}{TISSEC}{{ACM Transactions of Information and System Security (TISSEC)}}
+\osaconfname{\gpc}{GPC}{{Proceedings of the International Conference on Grid and Pervasive Computing (GPC)}}
+
+\osaconfname{\microkernels}{Microkernels}{{Proceedings of the USENIX Workshop on Microkernels and Other Kernel Architectures}}
+\osaconfname{\ares}{{ARES}}{{Proceedings of the International Conference on Availability, Reliability and Security (ARES)}}
+\osaconfname{\winter}{{USENIX Winter}}{{Proceedings of the Winter USENIX Conference}}
+\osaconfname{\otm}{{OTM}}{{On the Move to Meaningful Internet Systems (OTM)}}
+\osaconfname{\jacm}{{JACM}}{{Journal of the ACM}}
+\osaconfname{\icdcs}{{ICDCS}}{{Proceedings of the International
+    Conference on Distributed Computing Systems}}
+
+\osaconfname{\sigcomm}{{SIGCOMM}}{{Proceedings of the ACM SIGCOMM
+    Conference on Applications, Technologies, Architectures, and
+    Protocols for Computer Communications}}
+
+\osaconfname{\socc}{{SoCC}}{{Proceedings of the ACM Symposium on Cloud Computing}}

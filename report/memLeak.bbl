@@ -1,0 +1,17 @@
+\begin{thebibliography}{1}
+
+\bibitem{glibc}
+Gnu c library master sources.
+\newblock \url{https://sourceware.org/git/?p=glibc.git;a=summary}.
+
+\bibitem{llvm}
+{\em The LLVM Compiler Infrastructure}.
+\newblock \url{http://llvm.org/}.
+
+\bibitem{rugina}
+M.~Orlovich and R.~Rugina.
+\newblock Memory leak analysis by contradiction.
+\newblock In {\em Proceedings of the 13th International Conference on Static
+  Analysis}, SAS'06, pages 405--424, Berlin, Heidelberg, 2006. Springer-Verlag.
+
+\end{thebibliography}
