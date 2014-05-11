@@ -34,11 +34,11 @@ Program catalog:
 
   The leak pass.
 
-- * FunctionInfo.cpp:
+- \*) FunctionInfo.cpp:
 
   An auxiliary and independent tool to print out some function i
 
-- * SamplePass.cpp:
+- \*) SamplePass.cpp:
 
   An auxiliary and independent tool to show the usage of the Andersen's analysis. Provided by Jia (grievejia).
 
@@ -62,7 +62,7 @@ Usage:
 
   opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass testcase1.bc > /dev/null
 
-  *  For reference:
+  \*)  For reference:
 
   opt -load ./FunctionInfo.so -function-info testcase1.bc
 
