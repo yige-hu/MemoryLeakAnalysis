@@ -25,6 +25,9 @@ information:
 
 In this work, we use Chen's implementation on the Andersen's 
 analysis~\cite{chen} to get the above two information.
+The regions are represented by the $AllocaInst$ or $CallInst$ to the $malloc()$ 
+function in \llvm's SSA form. And the points-to set is represented by the 
+set of the memory regions a pointer may point to.
 
 
 \subsection{Language Semantics}
@@ -79,14 +82,48 @@ e\#rs iff \forall(*e')\in Mem(e). pt(e')\cap rs=\emptyset
 
 
 
-\subsection{Dataflow elements}
+\subsection{Dataflow Elements}
 \label{ss:dataflow}
+
+This subsection describes the Dataflow elements in the memory leak analysis. 
+
+\paragraph{Direction}
+
+It is a backward analysis.
 
 \paragraph{Flow Value}
 
-\paragraph{Detection Probes}
+The flow value is modeled by a triple of the form $(S,H,M)$, where:
 
-\paragraph{Meet Function}
+\begin{itemize}
+  \item $S\subseteq Rgn$ is the conservative set of regions that might hold 
+    pointers to the error cell;
+  \item $H$ is the Hit set, a set of expressions that point to the error cell; and 
+  \item $M$ is the Miss set, a set of expressions that do not reference the cell.
+\end{itemize}
+
+\paragraph{Detection Probes and Initial Flow Values}
+
+The analysis issues leak probes for the statements that can cause a potential 
+memory leakage. Especially, at the following programming points:
+
+\begin{enumerate}[(a)]
+  \item Assignments: for each $*x_0\gets x_1$ build a dataflow triple 
+    $(pt(e_0),{*e_0},{e_1})$;
+  \item Allocations: each $*x_0\gets malloc$ is probed as $*x_0\gets 0$;
+  \item Deallocations: for each $free(e)$, issue probes that correspond to a 
+    sequence of assignments $*(e.f)\gets 0$, for each field $f$ of $e$. This 
+    checks for leaks caused by freeing a cell that holds the last reference 
+    to another cell.
+\end{enumerate}
+
+This implementation does not deal with the last case, since from the 
+\llvm IR got by clang, the information of the fields in a struct is hidden and 
+cannot be accessed directly.
+
+\paragraph{Meet Operator}
+
+
 
 \paragraph{Transfer Function}
 
