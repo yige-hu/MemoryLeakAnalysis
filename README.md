@@ -53,22 +53,36 @@ Usage:
 
   [https://github.com/grievejia/andersen](https://github.com/grievejia/andersen)
 
-2. Compile & prepare for the inputs:
+2. Compile memLeak analysis:
 
+  Change the directory of the Andersen's analysis in the Makefile. Run:
+```bash
   make memLeak
+```
+3. Automatically run all the microbenchmarks:
 
+  Change the directory of the Andersen's analysis in "run_microbench.sh". Run:
+```bash
+  ./run_microbench.sh
+```bash
+
+4. Analyze other C programs:
+
+  Prepare for the .bc input:
+```bash
   ./prepare.sh [c file names (without .c)]
+```
+  e.g.
+```bash
+  ./prepare.sh benchmark/glibc_math/atest-sincos
+```
+  Run memLeak pass:
+```bash
+  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass atest-sincos.bc > /dev/null
+```
 
-  e.g. ./prepare.sh microbenchmark/1\_assignment/testcase1
-
-3. Run:
-
-  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass testcase1.bc > /dev/null
-
-  (\*)  For reference:
+  (\*)  For reference, usage of the SamplePass and FunctionInfo:
 
   opt -load ./FunctionInfo.so -function-info testcase1.bc
 
   opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./SamplePass.so -sample-pass testcase1.bc > /dev/null
-
-
