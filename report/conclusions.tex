@@ -1,0 +1,10 @@
+\section{Conclusions}
+
+We have implemented a memory leak detection based on a Dataflow algorithm using 
+a worklist, which is proposed by Orlovich and Rugina~\cite{rugina}. The analysis 
+starts a backward Dataflow for each probe statements to disprove its negation. 
+A set of six categories of microbenchmarks are tested to show the correctness 
+of the implementation. We have also examined two GNU C library programs with no 
+false positive. Due to the time constraint, the implementation only completes 
+the intra-procedural analysis. Also, not enough middle- or large-scale C 
+programs have been tested as benchmarks.
