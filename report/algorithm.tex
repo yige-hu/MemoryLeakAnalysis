@@ -125,14 +125,12 @@ cannot be accessed directly.
 \paragraph{Join Operation}
 
 The partial ordering for the flow value is such that 
-
 \begin{align*}
   (S_1,H_1,M_1)\sqsubseteq (S_2,H_2,M_2) \ &iif \ 
   S_1\subseteq S_2, H_1\supseteq H_2 and M_1\supseteq M_2
 \end{align*}
 
 Therefore, the join operation is defined as:
-
 \begin{align*}
   (S_1,H_1,M_1)\sqcup (S_2,H_2,M_2) &= (S_1\cup S_2,H_1\cap H_2,M_1\cap M_2)
 \end{align*}
@@ -158,8 +156,9 @@ $Miss()$ checks whether an expression is in the Miss set or is a new miss;
 $Infeasible()$ indicates a contradiction;
 $Cleanup()$ removes implicit miss to keep the dataflow facts as small as possible and avoid redundancy, while the correctness is conserved.
 
-Four kinds of statements are analyzed: \\
-(1) Assignments
+Four kinds of statements are analyzed:
+
+\subsubparagraph{(1) Assignments}
 
 \[
 \Vert *e_0 \gets e_1 \Vert(S,H,M)=\begin{cases}
@@ -168,8 +167,35 @@ Cleanup(S',H',M')& \text{otherwise}.
 \end{cases}
 \]
 
-where $S'=S\cup pt(e_0)$, and $H',M'$ are derived using the rules:
+where $S'=S\cup pt(e_0)$, and $H',M'$ are derived using the deduction rules 
+described in Figure~\ref{fig:rule_ass}, where $e^+$ and $e^-$ represent 
+respectively $e\in H$ and $e\in M$ (hit/miss expressions in the post-state); 
+$+^e$ and $-^e$ for $e\in H'$ and $e\in M'$ (hit/miss expressions in the 
+pre-state); and $e^{--}$ denotes that $Miss(e,(S,H,M))$. The set $\omega$ is 
+the set of regions potentially written by the assignment: $w=pt(e_0)$. Hence,
+an expression has the same value before and after the statement if it is 
+disjoint from $\omega$. 
+Filter 1-4 judges which expressions are reserved from the post-state to the 
+pre-state. Subst 1-2 generate new elementes in the Hit and Miss sets.
 
-\begin{align*}
-a
-\end{align*}
+%\begin{prooftree}
+%  \AxiomC{$e\#\omega$}
+%  \AxiomC{$e^{sgn}$}
+%  \BinaryInfC{$^{sgn}e$}
+%\end{prooftree}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1.0\columnwidth]{figs/rules_assignment}
+   \caption{\label{fig:rule_ass}}
+\end{figure}
+
+
+\subsubparagraph{(2) Allocations}
+
+
+\subsubparagraph{(3) Deallocations}
+
+
+\subsubparagraph{(4) Conditions}
+

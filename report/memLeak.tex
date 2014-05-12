@@ -6,12 +6,22 @@
 \usepackage{xspace}
 \usepackage{amssymb}
 \usepackage{amsmath}
+\usepackage{bussproofs}
+\usepackage{graphicx}
 \pagestyle{myheadings}
 \markright{CS380C Compilers\\ Course Project Report}
 
 \newcommand{\leakanalysis}[0]{LeakAnalysis.h\xspace}
 \newcommand{\llvm}[0]{LLVM\xspace}
 \newcommand{\crypt}[0]{glibc\_crypt\xspace}
+
+\usepackage{titlesec}
+\titleclass{\subsubparagraph}{straight}[\subparagraph]
+\newcounter{subsubparagraph}
+\renewcommand{\thesubsubparagraph}{\Alph{subsubparagraph}}
+\titleformat{\subsubparagraph}[runin]{\normalfont\normalsize\bfseries}{\thesubsubparagraph}{1em}{}
+\titlespacing*{\subsubparagraph} {\parindent}{3.25ex plus 1ex minus .2ex}{1em}
+
 
 \title{\bf \Large An Implimentation on Memry Leak Analysis by Contradiction}
 \author{\normalsize Yige Hu (yh66596)}
