@@ -59,6 +59,7 @@ Usage:
 ```bash
   make memLeak
 ```
+
 3. Automatically run all the microbenchmarks:
 
   Change the "ANDERS\_DIR" in "run_microbench.sh" into the directory of the Andersen's analysis. Run:
@@ -81,8 +82,9 @@ Usage:
   opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass atest-sincos.bc > /dev/null
 ```
 
-  (\*)  For reference, the usage of the SamplePass and FunctionInfo:
-
+5. (\*)  For reference, the usage of the SamplePass and FunctionInfo:
+```bash
   opt -load ./FunctionInfo.so -function-info testcase1.bc
 
   opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./SamplePass.so -sample-pass testcase1.bc > /dev/null
+```
