@@ -39,7 +39,7 @@ Program catalog:
 
 - (\*) FunctionInfo.cpp:
 
-  An auxiliary and independent tool to print out some function i
+  An auxiliary and independent tool to print out some function info.
 
 - (\*) SamplePass.cpp:
 
@@ -55,16 +55,16 @@ Usage:
 
 2. Compile memLeak analysis:
 
-  Change the directory of the Andersen's analysis in the Makefile. Run:
+  Change the "ANDERS\_DIR" in Makefile into the directory of the Andersen's analysis installed in step 1. Run:
 ```bash
   make memLeak
 ```
 3. Automatically run all the microbenchmarks:
 
-  Change the directory of the Andersen's analysis in "run_microbench.sh". Run:
+  Change the "ANDERS\_DIR" in "run_microbench.sh" into the directory of the Andersen's analysis. Run:
 ```bash
   ./run_microbench.sh
-```bash
+```
 
 4. Analyze other C programs:
 
@@ -81,7 +81,7 @@ Usage:
   opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass atest-sincos.bc > /dev/null
 ```
 
-  (\*)  For reference, usage of the SamplePass and FunctionInfo:
+  (\*)  For reference, the usage of the SamplePass and FunctionInfo:
 
   opt -load ./FunctionInfo.so -function-info testcase1.bc
 
