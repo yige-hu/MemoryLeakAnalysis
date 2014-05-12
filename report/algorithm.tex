@@ -1,2 +1,92 @@
 \section{Algorithm}
 \label{s:algorithm}
+
+We use the algorithm proposed by Orlovich and Rugina~\cite{rugina}. It is a 
+backward Dataflow analysis, validating a statement's safety by searching for 
+contradictions. It releases a detection probe for each suspicious statement 
+that might lead to a loss of the last reference to a heap cell, assuming that 
+a memory leak happens. A backward Dataflow analysis is immediately started from
+that program point to check whether a contradiction exists on all possible 
+branches, to prove that the probe statement is safe. If the Dataflow analysis 
+reaches a $\top$, or the program entry is reached, the analysis reports a 
+potential memory leak.
+
+A pointer analysis should be used to get the aliasing information, 
+which is then used to get the disjointness information. Flow-insensitive 
+pointer analysis such as Andersen style~\cite{andersen} or 
+Steensgaard's~\cite{steensgaard} can be used to get two kinds of required 
+information:
+
+\begin{itemize}
+  \item $Rgn$: the set of memory regions 
+    (i.e. different regions model disjoint sets of memory locations);
+  \item $pt(e)$:points-to information between regions.
+\end{itemize}
+
+In this work, we use Chen's implementation on the Andersen's 
+analysis~\cite{chen} to get the above two information.
+
+
+\subsection{Language Semantics}
+\label{ss:semantics}
+
+In this section we describe the semantics of the core imperative language 
+used by the algorithm, which helps better understand the later 
+paragraphs~\ref{ss:dataflow}.
+
+\paragraph{Syntax} for statements and expressions: \\
+
+$Statements s\in St s::= *e_0\gets e_1 | *e\gets malloc | gree(e) | 
+cond(e_0\equiv e_1) | return e | enter$ \\
+
+$Expressions e\in E e::= n | a | *e | e.f | e_0 \oplus e_1 $ \\
+
+where, \\
+$n\in \mathbb{Z}$ ranges over numeric constants ($NULL=0$), \\
+$a\in \mathbb{A}$ ranges over symbolic addresses, \\
+$f\in \mathbb{F}$ over structure fields, \\
+$\oplus$ over arithmetic operators, \\
+$\equiv$ over the comparison operators $=$ and $\ne$.
+
+\paragraph{Mem(e) Function} 
+
+The set $Mem(e)$ denotes the subexpressions of $e$ that represent memory 
+locations. This set is defined recursively as follows:
+
+\begin{align*}
+  Mem(n) &= Mem(a)=\emptyset \\
+Mem(e.f) &= Mem(e) \\
+ Mem(*e) &={*e}\cup Mem(e) \\
+Mem(e_0 \oplus e_1) &= Mem(e_0)\cup Mem(e_1)
+\end{align*}
+
+%The corresponding function in the implementation is the $getMem(e)$ 
+%function in \leakanalysis. \\ \\
+
+Because of \llvm's SSA form, the expression context $\varepsilon$ described 
+by the Rugina's paper~\cite{rugina} needn't be considered.
+
+\paragraph{Disjointness}
+
+The analysis uses the points-to information from the Andersen's analysis 
+to resolve alias queries. An expression $e$ is disjoint from a region set 
+$rs$, written $e\#rs$, if updates in any of the regions in $rs$ do not 
+affect value of $e$:
+
+\begin{align*}
+e\#rs iff \forall(*e')\in Mem(e). pt(e')\cap rs=\emptyset
+\end{align*}
+
+
+
+\subsection{Dataflow elements}
+\label{ss:dataflow}
+
+\paragraph{Flow Value}
+
+\paragraph{Detection Probes}
+
+\paragraph{Meet Function}
+
+\paragraph{Transfer Function}
+

@@ -2,8 +2,15 @@
 \usepackage{sectsty}
 \usepackage{url}
 \usepackage{enumitem}
+\usepackage{xspace}
+\usepackage{amssymb}
+\usepackage{amsmath}
 \pagestyle{myheadings}
 \markright{CS380C Compilers\\ Course Project Report}
+
+\newcommand{\leakanalysis}[0]{LeakAnalysis.h\xspace}
+\newcommand{\llvm}[0]{LLVM\xspace}
+\newcommand{\crypt}[0]{glibc\_crypt\xspace}
 
 \title{\bf \Large Implimentation on a Memry Leak Analysis by Contradiction}
 \author{\normalsize Yige Hu (yh66596)}
@@ -18,9 +25,9 @@
 \pagenumbering{arabic}
 
 This report describes an implementation based on the algorithm proposed by
-Orlovich and Rugina\cite{rugina}. The paper discusses on both intra- and
-inter- procedural analysis. Due to the time constraint, only the
-intra-procedual analysis is implemented in this work.\\ \\
+Orlovich and Rugina\cite{rugina} using \llvm. The paper discusses on both 
+intra- and inter- procedural analysis. Due to the time constraint, only the
+intra-procedual analysis is implemented in this work.
 
 %\input{abstract}
 \input{intro}

@@ -8,10 +8,10 @@ from the GNU C Library source code~\cite{glibc}.
 \subsection{Microbenchmarks}
 \label{microbenchmark}
 
-There are 6 set of microbenchmarks. The first 4 sets are used to check the 
-correctness of the analysis on 4 categories of statements being analyzed. 
-The 5th is for evaluation on structure type. And the 6th is a realistic 
-function for the linked-list.
+There are 6 set of microbenchmarks as shown in Table~\ref{tbl:micro}. 
+The first 4 sets are used to check the correctness of the analysis on 4 
+categories of statements being analyzed. The 5th is for evaluation on 
+structure type. And the 6th is a realistic function for the linked-list.
 
 %\begin{itemize}
 %  \item 1\_assignment: assignment statements of form: $*x_0\gets x_1$;
@@ -46,7 +46,6 @@ function for the linked-list.
     \hline
     \end{tabular}
     \caption{\label{tbl:micro} Description on microbenchmarks}
-\label{tbl:microbenchmark}
 \end{table}
 
 
@@ -68,11 +67,11 @@ dependencies. They are two atest programs in the GNU C math package:
 \end{itemize}
 
 No false positive are reported for the above two programs using our memory leak 
-analysis. \\ \\
+analysis.
 
-Two other GNU C Libray programs used for cryptograph (in the folder "glibc\_crypt" 
+Two other GNU C Libray programs used for cryptograph (in the folder \crypt) 
 is also tested, but throws assertion errors in the Andersen's 
-Analysis~\cite{jia}. \\ \\
+analysis implemented by Chen.~\cite{chen}.
 
 Due to the time constraint, we have not found enough large pieces of standard C 
 library codes that are suitable for the test.
