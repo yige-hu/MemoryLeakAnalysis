@@ -49,25 +49,25 @@ Program catalog:
 Usage:
 ----
 
-1. Install the Andersen's pointer analysis implemented by Jia:
+- Install the Andersen's pointer analysis implemented by Jia:
 
   [https://github.com/grievejia/andersen](https://github.com/grievejia/andersen)
 
-2. Compile memLeak analysis:
+- Compile memLeak analysis:
 
   Change the "ANDERS\_DIR" in Makefile into the directory of the Andersen's analysis installed in step 1. Run:
 ```bash
   make memLeak
 ```
 
-3. Automatically run all the microbenchmarks:
+- Automatically run all the microbenchmarks:
 
   Change the "ANDERS\_DIR" in "run_microbench.sh" into the directory of the Andersen's analysis. Run:
 ```bash
   ./run_microbench.sh
 ```
 
-4. Analyze other C programs:
+- Analyze other C programs:
 
   Prepare for the .bc input:
 ```bash
@@ -82,7 +82,7 @@ Usage:
   opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass atest-sincos.bc > /dev/null
 ```
 
-5. (\*)  For reference, the usage of the SamplePass and FunctionInfo:
+- (\*)  For reference, the usage of the SamplePass and FunctionInfo:
 ```bash
   opt -load ./FunctionInfo.so -function-info testcase1.bc
 
