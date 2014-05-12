@@ -8,7 +8,8 @@ from the GNU C Library source code~\cite{glibc}.
 \subsection{Microbenchmarks}
 \label{microbenchmark}
 
-There are 6 set of microbenchmarks as shown in Table~\ref{tbl:micro}. 
+There are 6 sets of microbenchmarks as shown in Table~\ref{tbl:micro}, 
+containing a total of 12 testcases, each of which is a small-scale C program.
 The first 4 sets are used to check the correctness of the analysis on 4 
 categories of statements being analyzed. The 5th is for evaluation on 
 structure type. And the 6th is a realistic function for the linked-list.
@@ -47,7 +48,6 @@ structure type. And the 6th is a realistic function for the linked-list.
     \end{tabular}
     \caption{\label{tbl:micro} Description on microbenchmarks}
 \end{table}
-
 
 The analysis discovers all potential memory leak for the above microbenchmarks 
 with no false negative and false positive.

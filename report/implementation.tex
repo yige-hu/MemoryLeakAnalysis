@@ -1,2 +1,97 @@
-\section{Implementation Details}
+\section{Implementation Details and Improvements}
 \label{s:implementation}
+
+The analysis uses a worklist-based Dataflow algorithm. 
+This section describes some implementation details. Also, some other constraints 
+are added to decrease the false positives.
+
+\paragraph{The Representation of Pointers in the Hit Set}
+
+One difference between the implementation and the paper's description is that 
+instead of storing the pointer ${*e_0}$,
+we allow the Hit set in the dataflow value to store either ${*e_0}$ or its 
+address ${e_0}$ to represent the pointer. This is to adapt \llvm's SSA form 
+representation of the store instructions, from which only the address of the 
+pointer can be get, instead of a concrete representation of a pointer itself. 
+e.g. When an variable address is stored into a pointer, the SSA form 
+representation will be:
+\begin{align*}
+store i32* \%1, i32** \%a, align 8
+\end{align*}
+where $\%a$ is the address of the pointer $a$.
+
+Accordingly, changes are made into the transfer functions and the deduction 
+rules to consider both the cases when either a pointer's value or a pointer's 
+address is stored to represent the pointer's existence in the Hit set. 
+Such changes also guarantee that the new rules are equivalent to the rules in 
+the Rugina~\cite{rugina} paper. Take the deduction rule $[SUBST2]$ in 
+Figure~\ref{fig:rule_ass} 
+as an example, its new representation in our implementation will 
+be two separate rules:
+\begin{prooftree}
+  \AxiomC{$e_0\#\omega$}
+  \AxiomC{$\exists(*e')\in M$}
+  \AxiomC{$e'=e_0$}
+  \TrinaryInfC{$^-e_1$}
+\end{prooftree}
+and
+\begin{prooftree}
+  \AxiomC{$e_0\#\omega$}
+  \AxiomC{$S\cap pt(e_0)=\emptyset$}
+  \BinaryInfC{$^-e_1$}
+\end{prooftree}
+
+
+\paragraph{Branches, Worklist and Exit Conditions}
+
+When there are branches in the program, the analysis reaches a $\bot$ only if 
+contradiction exist in all branches. The Rugina~\cite{rugina} paper does not 
+describe how to handle this in details. So in this paragraph we will have a 
+short discussion on the details of worklist, branches and exiting conditions.
+
+Firstly, we added another boolean value $Contr$ into the flow value to 
+represent a contradiction has been discovered. And the join operation is 
+extended like this:
+\begin{align*}
+  (S_1,H_1,M_1,Contr_1) &\sqcup (S_2,H_2,M_2,Contr_2) \\
+  = (S_1\cup S_2,H_1\cap H_2, & M_1\cap M_2,Contr_1\wedge Contr_2)
+\end{align*}
+
+When a probe statement is reached, the analysis start a backward Dataflow 
+analysis by inserting the basic block where 
+the probe resides in. Then, the analysis continues to work until one of the 
+following conditions is met:
+\begin{itemize}
+  \item A $\top$ is reached: the analysis exit and prompt an warning of 
+    potential memory leak;
+  \item A $\bot$ is reached in the local basic block of the probe: 
+    the probe is proved to be safe and the analysis exits without checking all 
+    the branches;
+  \item A $\bot$ is reached in the entry block from all of its successors:
+    the probe is proved to be safe and the analysis exits;
+  \item The entry point is reached and the worklist is empty.
+\end{itemize}
+
+If a basic block gets a $\bot$ through the meet operation on all its successors,
+or if a new $\bot$ is reached inside a basic block, we will skip the analysis on 
+the remaining statements in that block, and add its predecessors into the 
+worklist.
+
+Also, to avoid redundent loops for the convergence of the dataflow values, 
+we only insert a predecessor $BB_p$ of a basic block $BB_s$ iff. they meets 
+all the following conditions:
+\begin{itemize}
+  \item $BB_s$ has been changed;
+  \item The $Contr$ in $BB_p$'s out value has not been set to $true$ before.
+\end{itemize}
+
+
+\paragraph{Improvements}
+
+Besides the cases discussed in the Rugina~\cite{rugina} paper, we also exclude 
+some other cases which can generate false positives;
+
+\begin{itemize}
+  \item The first assignment of an uninitialized pointer;
+  \item The storage into a non-pointer type;
+\end{itemize}
