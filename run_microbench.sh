@@ -9,6 +9,8 @@ for f in "${sorted[@]}"
 do
   f_name=`echo $f | sed "s/\.c$//"`
   f_name_base=`basename $f_name`
+  echo
+  echo "============================= $f_name_base ============================="
   ./prepare.sh $f_name
   cat $f
   echo "running memLeak analysis...."
