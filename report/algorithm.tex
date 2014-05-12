@@ -77,7 +77,7 @@ $rs$, written $e\#rs$, if updates in any of the regions in $rs$ do not
 affect value of $e$:
 
 \begin{align*}
-e\#rs iff \forall(*e')\in Mem(e). pt(e')\cap rs=\emptyset
+e\#rs \ iff \ \forall(*e')\in Mem(e). pt(e')\cap rs=\emptyset
 \end{align*}
 
 
@@ -91,9 +91,10 @@ This subsection describes the Dataflow elements in the memory leak analysis.
 
 It is a backward analysis.
 
-\paragraph{Flow Value}
+\paragraph{Flow Value and Error Cell Abstraction}
 
-The flow value is modeled by a triple of the form $(S,H,M)$, where:
+The flow value as well as the error cell is modeled by a triple of the form 
+$(S,H,M)$, where:
 
 \begin{itemize}
   \item $S\subseteq Rgn$ is the conservative set of regions that might hold 
@@ -121,9 +122,54 @@ This implementation does not deal with the last case, since from the
 \llvm IR got by clang, the information of the fields in a struct is hidden and 
 cannot be accessed directly.
 
-\paragraph{Meet Operator}
+\paragraph{Join Operation}
 
+The partial ordering for the flow value is such that 
+
+\begin{align*}
+  (S_1,H_1,M_1)\sqsubseteq (S_2,H_2,M_2) \ &iif \ 
+  S_1\subseteq S_2, H_1\supseteq H_2 and M_1\supseteq M_2
+\end{align*}
+
+Therefore, the join operation is defined as:
+
+\begin{align*}
+  (S_1,H_1,M_1)\sqcup (S_2,H_2,M_2) &= (S_1\cup S_2,H_1\cap H_2,M_1\cap M_2)
+\end{align*}
 
 
 \paragraph{Transfer Function}
 
+The transfer function differs on four categories of statements: assignment, 
+allocation, deallocation and condition. A set of helper functions are used 
+by the transfer functions:
+
+\begin{align*}
+  ImplicitMiss(e,(S,H,M)) &= (e=n) \vee (e=a) \vee (e=*n) \vee (e=n.f) \vee \\
+                          &\ \ \ \ (e=*e' \wedge (S\cap pt(e')=\emptyset)) \\
+  Miss(e,(S,H,M)) &= e\in M \vee ImplicitMiss(e,(S,H,M)) \\
+Infeasible(S,H,M) &= \exists e \in H. Miss(e,(S,H,M)) \\
+   Cleanup(S,H,M) &= (S,H,M'), \ where: \\
+  M' &= {e|e\in M \wedge \urcorner ImplicitMiss(e,(S,H,M))} \\
+\end{align*}
+
+where $ImplicitMiss()$ generates new misses;
+$Miss()$ checks whether an expression is in the Miss set or is a new miss; 
+$Infeasible()$ indicates a contradiction;
+$Cleanup()$ removes implicit miss to keep the dataflow facts as small as possible and avoid redundancy, while the correctness is conserved.
+
+Four kinds of statements are analyzed: \\
+(1) Assignments
+
+\[
+\Vert *e_0 \gets e_1 \Vert(S,H,M)=\begin{cases}
+\bot& \text{if $Infeasible(S',H',M')$},\\
+Cleanup(S',H',M')& \text{otherwise}.
+\end{cases}
+\]
+
+where $S'=S\cup pt(e_0)$, and $H',M'$ are derived using the rules:
+
+\begin{align*}
+a
+\end{align*}
