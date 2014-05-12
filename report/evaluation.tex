@@ -11,8 +11,8 @@ from the GNU C Library source code~\cite{glibc}.
 There are 6 sets of microbenchmarks as shown in Table~\ref{tbl:micro}, 
 containing a total of 12 testcases, each of which is a small-scale C program.
 The first 4 sets are used to check the correctness of the analysis on 4 
-categories of statements being analyzed. The 5th is for evaluation on 
-structure type. And the 6th is a realistic function for the linked-list.
+categories of statements being analyzed. The 5th is for  
+structure types. And the 6th is a realistic function for reverting a linked-list.
 
 %\begin{itemize}
 %  \item 1\_assignment: assignment statements of form: $*x_0\gets x_1$;
@@ -50,7 +50,7 @@ structure type. And the 6th is a realistic function for the linked-list.
 \end{table}
 
 The analysis discovers all potential memory leak for the above microbenchmarks 
-with no false negative and false positive.
+with no false negatives or false positives.
 
 
 \subsection{Benchmarks}
@@ -71,7 +71,7 @@ analysis.
 
 Two other GNU C Libray programs used for cryptograph (in the folder \crypt) 
 is also tested, but throws assertion errors in the Andersen's 
-analysis implemented by Chen.~\cite{chen}.
+analysis implemented by Chen~\cite{chen}.
 
 Due to the time constraint, we have not found enough large pieces of standard C 
 library codes that are suitable for the test.

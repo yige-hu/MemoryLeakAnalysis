@@ -7,9 +7,11 @@ contradictions. It releases a detection probe for each suspicious statement
 that might lead to a loss of the last reference to a heap cell, assuming that 
 a memory leak happens. A backward Dataflow analysis is immediately started from
 that program point to check whether a contradiction exists on all possible 
-branches, to prove that the probe statement is safe. If the Dataflow analysis 
-reaches a $\top$, or the program entry is reached, the analysis reports a 
+branches, which proves that the probe statement is safe. If the Dataflow analysis 
+reaches a $\top$ or the program entry is reached, the analysis reports a 
 potential memory leak.
+
+\paragraph{Aliasing Information}
 
 A pointer analysis should be used to get the aliasing information, 
 which is then used to get the disjointness information. Flow-insensitive 
@@ -20,7 +22,7 @@ information:
 \begin{itemize}
   \item $Rgn$: the set of memory regions 
     (i.e. different regions model disjoint sets of memory locations);
-  \item $pt(e)$:points-to information between regions.
+  \item $pt(e)$: points-to information between regions.
 \end{itemize}
 
 In this work, we use Chen's implementation on the Andersen's 
@@ -34,22 +36,24 @@ set of the memory regions a pointer may point to.
 \label{ss:semantics}
 
 In this section we describe the semantics of the core imperative language 
-used by the algorithm, which helps better understand the later 
-paragraphs~\ref{ss:dataflow}.
+used by the algorithm, which helps better understand the later sections.
 
-\paragraph{Syntax} for statements and expressions: \\
+\paragraph{Syntax} 
+\begin{align*}
+  Statements s\in St s:: &= *e_0\gets e_1\ |\ *e\gets malloc\ |\ free(e)\ |\ \\
+                         &     cond(e_0\equiv e_1)\ |\ return e\ |\ enter \\
+  Expressions e\in E e:: &= n\ |\ a\ |\ *e\ |\ e.f\ |\ e_0 \oplus e_1 
+\end{align*}
 
-$Statements s\in St s::= *e_0\gets e_1 | *e\gets malloc | gree(e) | 
-cond(e_0\equiv e_1) | return e | enter$ \\
+where, 
+\begin{align*}
+  n\in \mathbb{Z} &\text{  ranges over numeric constants $(NULL=0)$}, \\
+  a\in \mathbb{A} &\text{  over symbolic addresses,} \\
+  f\in \mathbb{F} &\text{  over structure fields,} \\
+           \oplus &\text{  over arithmetic operators,} \\
+           \equiv &\text{  over the comparison operators $=$ and $\ne$.}
+\end{align*}
 
-$Expressions e\in E e::= n | a | *e | e.f | e_0 \oplus e_1 $ \\
-
-where, \\
-$n\in \mathbb{Z}$ ranges over numeric constants ($NULL=0$), \\
-$a\in \mathbb{A}$ ranges over symbolic addresses, \\
-$f\in \mathbb{F}$ over structure fields, \\
-$\oplus$ over arithmetic operators, \\
-$\equiv$ over the comparison operators $=$ and $\ne$.
 
 \paragraph{Mem(e) Function} 
 
@@ -64,18 +68,18 @@ Mem(e_0 \oplus e_1) &= Mem(e_0)\cup Mem(e_1)
 \end{align*}
 
 %The corresponding function in the implementation is the $getMem(e)$ 
-%function in \leakanalysis. \\ \\
+%function in \leakanalysis.
 
 Because of \llvm's SSA form, the expression context $\varepsilon$ described 
-by the Rugina's paper~\cite{rugina} needn't be considered.
+by the Rugina's paper~\cite{rugina} need not be considered.
 
 \paragraph{Disjointness}
 
 The analysis uses the points-to information from the Andersen's analysis 
-to resolve alias queries. An expression $e$ is disjoint from a region set 
+to resolve alias and disjointness queries. 
+An expression $e$ is disjoint from a region set 
 $rs$, written $e\#rs$, if updates in any of the regions in $rs$ do not 
 affect value of $e$:
-
 \begin{align*}
 e\#rs \ iff \ \forall(*e')\in Mem(e). pt(e')\cap rs=\emptyset
 \end{align*}
@@ -89,7 +93,7 @@ This subsection describes the Dataflow elements in the memory leak analysis.
 
 \paragraph{Direction}
 
-It is a backward analysis.
+Backwards.
 
 \paragraph{Flow Value and Error Cell Abstraction}
 
@@ -114,7 +118,7 @@ memory leakage. Especially, at the following programming points:
 
 \begin{enumerate}[(a)]
   \item Assignments: for each $*x_0\gets x_1$ build a dataflow triple 
-    $(pt(e_0),{*e_0},{e_1})$;
+    $(pt(e_0),\{*e_0\},\{e_1\})$;
   \item Allocations: each $*x_0\gets malloc$ is probed as $*x_0\gets 0$;
   \item Deallocations: for each $free(e)$, issue probes that correspond to a 
     sequence of assignments $*(e.f)\gets 0$, for each field $f$ of $e$. This 
@@ -123,15 +127,15 @@ memory leakage. Especially, at the following programming points:
 \end{enumerate}
 
 This implementation does not deal with the last case, since from the 
-\llvm IR got by clang, the information of the fields in a struct is hidden and 
-cannot be accessed directly.
+\llvm IR got by $clang$, the information of the fields in a structure is 
+hidden and cannot be accessed directly.
 
 \paragraph{Join Operation}
 
 The partial ordering for the flow value is such that 
 \begin{align*}
   (S_1,H_1,M_1)\sqsubseteq (S_2,H_2,M_2) \ &iif \ 
-  S_1\subseteq S_2, H_1\supseteq H_2 and M_1\supseteq M_2
+  S_1\subseteq S_2 \wedge H_1\supseteq H_2 \wedge M_1\supseteq M_2
 \end{align*}
 
 Therefore, the join operation is defined as:
@@ -187,13 +191,13 @@ Cleanup(S',H',M')& \text{otherwise}.
 where $S'=S\cup pt(e_0)$, and $H',M'$ are derived using the deduction rules 
 described in Figure~\ref{fig:rule_ass}, where $e^+$ and $e^-$ represent 
 respectively $e\in H$ and $e\in M$ (hit/miss expressions in the post-state); 
-$+^e$ and $-^e$ for $e\in H'$ and $e\in M'$ (hit/miss expressions in the 
+$^+e$ and $^-e$ for $e\in H'$ and $e\in M'$ (hit/miss expressions in the 
 pre-state); and $e^{--}$ denotes that $Miss(e,(S,H,M))$. The set $\omega$ is 
 the set of regions potentially written by the assignment: $w=pt(e_0)$. Hence,
 an expression has the same value before and after the statement if it is 
 disjoint from $\omega$. 
-Filter 1-4 judges which expressions are reserved from the post-state to the 
-pre-state. Subst 1-2 generate new elementes in the Hit and Miss sets.
+[FILTER 1-4] judges which expressions are reserved from the post-state to the 
+pre-state. [SUBST 1-2] generate new elementes in the Hit and Miss sets.
 
 
 \subsubparagraph{(2) Allocations}
