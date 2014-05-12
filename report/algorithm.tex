@@ -103,6 +103,10 @@ $(S,H,M)$, where:
   \item $M$ is the Miss set, a set of expressions that do not reference the cell.
 \end{itemize}
 
+$\bot$ means there is a contradiction, i.e. the statement is safe; 
+$\top$ means there is a potential memory leak, and that the analysis should 
+prompt a warning to the user.
+
 \paragraph{Detection Probes and Initial Flow Values}
 
 The analysis issues leak probes for the statements that can cause a potential 
@@ -167,6 +171,19 @@ Cleanup(S',H',M')& \text{otherwise}.
 \end{cases}
 \]
 
+%\begin{prooftree}
+%  \AxiomC{$e\#\omega$}
+%  \AxiomC{$e^{sgn}$}
+%  \BinaryInfC{$^{sgn}e$}
+%\end{prooftree}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1.0\columnwidth]{figs/rules_assignment}
+   \caption{Duduction rules for the analysis on assignments.}
+   \label{fig:rule_ass}
+\end{figure}
+
 where $S'=S\cup pt(e_0)$, and $H',M'$ are derived using the deduction rules 
 described in Figure~\ref{fig:rule_ass}, where $e^+$ and $e^-$ represent 
 respectively $e\in H$ and $e\in M$ (hit/miss expressions in the post-state); 
@@ -178,24 +195,46 @@ disjoint from $\omega$.
 Filter 1-4 judges which expressions are reserved from the post-state to the 
 pre-state. Subst 1-2 generate new elementes in the Hit and Miss sets.
 
-%\begin{prooftree}
-%  \AxiomC{$e\#\omega$}
-%  \AxiomC{$e^{sgn}$}
-%  \BinaryInfC{$^{sgn}e$}
-%\end{prooftree}
-
-\begin{figure}
-  \centering
-  \includegraphics[width=1.0\columnwidth]{figs/rules_assignment}
-   \caption{\label{fig:rule_ass}}
-\end{figure}
-
 
 \subsubparagraph{(2) Allocations}
 
+\[
+\Vert *e_0 \gets malloc \Vert(d)=\begin{cases}
+\bot& \text{if $UnaliasedHit \wedge (*e_0 \in H \wedge e_0\#\omega)$},\\
+\Vert *e_0 \gets 0 \Vert (d)& 
+  \text{if $UnaliasedHit \vee (Miss(*e_0,d) \wedge e_0\#\omega)$},\\
+\top& \text{otherwise}.
+\end{cases}
+\]
+
+where $d=(S,H,M)$, $\omega=pt(e_0)$, and 
+$UnaliasedHit=\exists(*e)\in H:pt(e)\cap\omega =\emptyset$.
 
 \subsubparagraph{(3) Deallocations}
 
+\[
+\Vert free(*e_0) \Vert(S,H,M)=\begin{cases}
+\bot& \text{if $e \in H$},\\
+(S,H,M)& \text{if $(Miss(e,(S,H,M))$},\\
+(S,H,M\cup {e})& \text{otherwise}.
+\end{cases}
+\]
 
 \subsubparagraph{(4) Conditions}
 
+\[
+\Vert cond(e_0\equiv e_1)\Vert(S,H,M)=\begin{cases}
+\bot& \text{if $Infeasible(S,H",M")$},\\
+Cleanup(S,H",M")& \text{otherwise}.
+\end{cases}
+\]
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1.0\columnwidth]{figs/rules_cond}
+   \caption{Duduction rules for the analysis on conditions.}
+   \label{fig:rule_cond}
+\end{figure}
+
+where $H"=H\cup H'$, $M"=M\cup M'$, $H'$ and $M'$ are the new hit and miss 
+expressions derived using the deduction rules in Figure~\ref{fig:rule_cond}.
