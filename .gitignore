@@ -32,6 +32,7 @@
 *.bak
 *.swp
 *.tar.gz
+finalproject/
 
 # Latex
 *.bbl
