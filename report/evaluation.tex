@@ -9,7 +9,7 @@ from the GNU C Library source code~\cite{glibc}.
 \label{microbenchmark}
 
 There are 6 sets of microbenchmarks as shown in Table~\ref{tbl:micro}, 
-containing a total of 12 testcases, each of which is a small-scale C program.
+containing a total of 12 test-cases, each of which is a small-scale C program.
 The first 4 sets are used to check the correctness of the analysis on 4 
 categories of statements being analyzed. The 5th is for  
 structure types. And the 6th is a realistic function for reverting a linked-list.
@@ -63,13 +63,13 @@ dependencies. They are two atest programs in the GNU C math package:
 
 \begin{itemize}
   \item glibc\_math/atest-exp.c
-  \item libc\_math/atest-sincos.c
+  \item glibc\_math/atest-sincos.c
 \end{itemize}
 
 No false positive are reported for the above two programs using our memory leak 
 analysis.
 
-Two other GNU C Libray programs used for cryptograph (in the folder \crypt) 
+Two other GNU C Library programs used for cryptography (in the folder \crypt) 
 is also tested, but throws assertion errors in the Andersen's 
 analysis implemented by Chen~\cite{chen}.
 

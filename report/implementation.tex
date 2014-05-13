@@ -26,7 +26,7 @@ address is stored to represent the pointer's existence in the Hit set.
 Such changes also guarantee that the new rules are equivalent to the rules in 
 the Rugina~\cite{rugina} paper. Take the deduction rule [SUBST 2] in 
 Figure~\ref{fig:rule_ass} 
-as an example, it is decomposed into two saparate rules in our new representation:
+as an example, it is decomposed into two separate rules in our new representation:
 \begin{prooftree}
   \AxiomC{$e_0\#\omega$}
   \AxiomC{$\exists(*e')\in M$}
@@ -76,7 +76,7 @@ or if a new $\bot$ is reached inside a basic block, we will skip the analysis on
 the remaining statements in that block, and add its predecessors into the 
 worklist.
 
-Also, to avoid redundent loops for the convergence of the dataflow values, 
+Also, to avoid redundant loops for the convergence of the dataflow values, 
 we only insert a predecessor $BB_p$ of a basic block $BB_s$ if and only if they 
 meet with all the following conditions:
 \begin{itemize}
