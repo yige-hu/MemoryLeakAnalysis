@@ -212,6 +212,11 @@ pre-state. [SUBST 1-2] generate new elements in the Hit and Miss sets.
 
 where $d=(S,H,M)$, $\omega=pt(e_0)$, and 
 $UnaliasedHit=\exists(*e)\in H:pt(e)\cap\omega =\emptyset$.
+It denotes that there is some expression unaliased to $*e_0$ also 
+references the cell. Thus, if it holds as well as $(*e_0)^+$, a contradiction
+occurs. Or, if there is evidence that the error cell has not been 
+allocated at this site, it proceeds past this statement, treating the 
+allocation as a nullification $*e_0 \gets 0$.
 
 \subsubparagraph{(3) Deallocations}
 
@@ -222,6 +227,10 @@ $UnaliasedHit=\exists(*e)\in H:pt(e)\cap\omega =\emptyset$.
 (S,H,M\cup {e})& \text{otherwise}.
 \end{cases}
 \]
+
+A contradiction occurs if the reference lost is a reference to a cell that has 
+already been freed, which is actually not an error. Otherwise, the analysis 
+knows that $e$ misses in the pre-state.
 
 \subsubparagraph{(4) Conditions}
 
@@ -240,4 +249,6 @@ Cleanup(S,H",M")& \text{otherwise}.
 \end{figure}
 
 where $H"=H\cup H'$, $M"=M\cup M'$, $H'$ and $M'$ are the new hit and miss 
-expressions derived using the deduction rules in Figure~\ref{fig:rule_cond}.
+expressions derived using the deduction rules in Figure~\ref{fig:rule_cond}. 
+The conditions can help derive new hit and miss expressions in the pre-state 
+because they infer that the (in)equality is succeeded in the post-state.
