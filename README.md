@@ -1,7 +1,7 @@
 Memory Leak Analysis by Contradiction
 ====
 
-Yige Hu
+Yige Hu (yh6596)
 
 CS380c final project:
 
@@ -36,14 +36,6 @@ Program catalog:
 - MemLeak.h & cpp:
 
   The leak pass.
-
-- (\*) FunctionInfo.cpp:
-
-  An auxiliary and independent tool to print out some function info.
-
-- (\*) SamplePass.cpp:
-
-  An auxiliary and independent tool to show the usage of the Andersen's analysis. Provided by Jia (grievejia).
 
 
 Usage:
@@ -80,11 +72,4 @@ Usage:
   Run memLeak pass:
 ```bash
   opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass atest-sincos.bc > /dev/null
-```
-
-- (\*)  For reference, the usage of the SamplePass and FunctionInfo:
-```bash
-  opt -load ./FunctionInfo.so -function-info testcase1.bc
-
-  opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./SamplePass.so -sample-pass testcase1.bc > /dev/null
 ```
