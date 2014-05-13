@@ -41,7 +41,7 @@ Program catalog:
 Usage:
 ----
 
-For the compatibility purpose with Jia's Andersen's analysis, LLVM 3.5 with trunk 203470 is suggested to be installed.
+For the compatibility purpose with Jia's Andersen's analysis, LLVM is strongly suggested to be installed with v3.5, trunk 203470 .
 
 - Install the Andersen's pointer analysis implemented by Jia:
 
