@@ -58,19 +58,19 @@ with no false negatives or false positives.
 
 The benchmarks is composed of two C programs taken from the GNU C Library 
 source code~\cite{glibc}. For the convenience concern, the C programs selected 
-are those can be compiled by clang as an independent C program without other
-dependencies. They are two atest programs in the GNU C math package:
+are those can be compiled by $clang$ as an independent C program without other
+dependencies. They are two $atest$ programs in the GNU C math package:
 
 \begin{itemize}
   \item glibc\_math/atest-exp.c
   \item glibc\_math/atest-sincos.c
 \end{itemize}
 
-No false positive are reported for the above two programs using our memory leak 
+No false positives are reported for the above two programs using our memory leak 
 analysis.
 
 Two other GNU C Library programs used for cryptography (in the folder \crypt) 
-is also tested, but throws assertion errors in the Andersen's 
+are also tested, but throw assertion errors in the Andersen's 
 analysis implemented by Chen~\cite{chen}.
 
 Due to the time constraint, we have not found enough large pieces of standard C 

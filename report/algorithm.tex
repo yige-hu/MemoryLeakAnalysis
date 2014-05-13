@@ -15,7 +15,7 @@ potential memory leak.
 \subsection{Core Imperative Language}
 \label{ss:semantics}
 
-In this section we describe the core imperative language 
+In this subsection we describe the core imperative language 
 used by the algorithm, which helps better understand the later sections.
 
 \paragraph{Syntax} 
@@ -55,17 +55,16 @@ by the Rugina's paper~\cite{rugina} need not be considered.
 
 \paragraph{Disjointness}
 
-The analysis uses the points-to information from the Andersen's analysis 
+The analysis uses the points-to information from a pointer analysis 
 to resolve alias and disjointness queries. 
 An expression $e$ is disjoint from a region set 
 $rs$, written $e\#rs$, if updates in any of the regions in $rs$ do not 
 affect value of $e$:
 \begin{align*}
-e\#rs \iff \forall(*e')\in Mem(e). pt(e')\cap rs=\emptyset
+e\#rs \iff \forall(*e')\in Mem(e). \ pt(e')\cap rs=\emptyset
 \end{align*}
 
-Where $pt(e')$ is the point-to set of the expression $e'$. 
-A pointer analysis should be used to get such aliasing information. 
+Where $pt(e')$ is the points-to set of $e'$ got by the pointer analysis. 
 Flow-insensitive pointer analysis such as Andersen's~\cite{andersen} or 
 Steensgaard's~\cite{steensgaard} can be used to get the two kinds of 
 required information:

@@ -6,8 +6,8 @@ causes a system to run out of memory, and is difficult to identify.
 
 We describe a \llvm~\cite{llvm} implementation on an analysis which
 can detect a set of errors caused by the memory leak. The implementation is
-based on a Dataflow algorithm using a worklist, proposed by Orlovich and 
-Rugina~\cite{rugina}.
+based on an iterative Dataflow algorithm using a worklist, proposed by Orlovich 
+and Rugina~\cite{rugina}.
 
 We analysis and detect the potential memory leak error
 by checking whether a statement can cause a potential loss of reference to a 

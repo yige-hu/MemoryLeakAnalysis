@@ -29,9 +29,8 @@ Figure~\ref{fig:rule_ass}
 as an example, it is decomposed into two separate rules in our new representation:
 \begin{prooftree}
   \AxiomC{$e_0\#\omega$}
-  \AxiomC{$\exists(*e')\in M$}
-  \AxiomC{$e'=e_0$}
-  \TrinaryInfC{$^-e_1$}
+  \AxiomC{$\exists(*e')\in M. \ e'=e_0$}
+  \BinaryInfC{$^-e_1$}
 \end{prooftree}
 and
 \begin{prooftree}
@@ -45,7 +44,7 @@ and
 
 When there are branches in the program, the analysis reaches a $\bot$ if and only 
 if contradiction exist in all branches. The Rugina~\cite{rugina} paper does not 
-describe this part in details. So in this paragraph we will have a 
+expand this part. So in this paragraph we will have a 
 short discussion on the details of worklist, branches and exiting conditions.
 
 Firstly, we added another boolean value $Contr$ into the flow value to 
@@ -61,14 +60,15 @@ by inserting into the worklist the basic block where
 the probe resides. Then, the analysis continues to work until one of the 
 following conditions is met:
 \begin{itemize}
-  \item A $\top$ is reached: the analysis exit and prompt an warning of 
+  \item A $\top$ is reached: the analysis exits and prompts an warning of 
     potential memory leak;
+  \item The entry point is reached and the worklist is empty: 
+    the analysis exits and reports a warning.
   \item A $\bot$ is reached in the local basic block of the probe: 
     the probe is proved to be safe and the analysis exits without checking all 
     the branches;
   \item A $\bot$ is reached in the entry block from all of its successors:
     the probe is proved to be safe and the analysis exits;
-  \item The entry point is reached and the worklist is empty.
 \end{itemize}
 
 If a basic block gets a $\bot$ through the meet operation on all its successors,
@@ -76,9 +76,9 @@ or if a new $\bot$ is reached inside a basic block, we will skip the analysis on
 the remaining statements in that block, and add its predecessors into the 
 worklist.
 
-Also, to avoid redundant loops for the convergence of the dataflow values, 
-we only insert a predecessor $BB_p$ of a basic block $BB_s$ if and only if they 
-meet with all the following conditions:
+Also, to avoid redundant Dataflow iterations for the convergence of the dataflow 
+values, we only insert a predecessor $BB_p$ of a basic block $BB_s$ if and only if 
+they meet with all the following conditions:
 \begin{itemize}
   \item $BB_s$ has been changed;
   \item The $Contr$ in $BB_p$'s out value equals to $false$.
@@ -88,7 +88,7 @@ meet with all the following conditions:
 \paragraph{Improvements}
 
 Besides the cases discussed in the Rugina~\cite{rugina} paper, we also exclude 
-some other cases which can generate false positives;
+some other cases that can generate false positives;
 
 \begin{itemize}
   \item The first assignment of an uninitialized pointer;
