@@ -17,21 +17,21 @@ has ended.
 
 The analysis works as a backward Dataflow analysis. For each suspicious 
 statement that can lead to a potential memory leak, the analysis assumes that 
-it causes a loss of the last reference to the cell, and forms an error cell. 
-The analysis then release a detection probe to starts a backward 
+it causes a loss of the last reference to the cell.
+It then releases a detection probe to starts a backward 
 Dataflow analysis from that programming point. If a contradiction is formed 
-and the analysis reaches a bottom, the probe statement is proved to be safe. 
+and the analysis reaches a $\bot$, the probe statement is proved to be safe. 
 Otherwise, if the analysis reaches a $\top$, or it reaches the program entry, 
 a warning of potential memory leak is released.
 
 Section~\ref{s:algorithm} introduces the syntax, notations and algorithm
 used within the report. Then, Section~\ref{s:implementation} discusses 
 some implementation details, including the differences between the Rugina
-~\cite{rugina} paper and our implementation, the discussion 
-on branch and worklist management, and some improvements. 
+~\cite{rugina} paper and our implementation; the discussion 
+on branch and worklist management; and some improvements. 
 Finally, the evaluation in Section~\ref{s:evaluation} is done through 
 benchmarking. A set of 6 kinds
 of microbenchmarks is used to show the correctness on different categories of
 statements being analyzed. Then, two C programs from the GNU C Library source
 code~\cite{glibc} are used to evaluate the performance on larger programs. No 
-false positive are shown in the two GNU C programs.
+false positives are shown when analyzing the two GNU C programs.

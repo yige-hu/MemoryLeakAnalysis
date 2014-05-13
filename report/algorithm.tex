@@ -6,36 +6,16 @@ backward Dataflow analysis, validating a statement's safety by searching for
 contradictions. It releases a detection probe for each suspicious statement 
 that might lead to a loss of the last reference to a heap cell, assuming that 
 a memory leak happens. A backward Dataflow analysis is immediately started from
-that program point to check whether a contradiction exists on all possible 
-branches, which proves that the probe statement is safe. If the Dataflow analysis 
+that program point to check whether contradiction exist on all possible 
+branches, which then proves that the probe statement is safe. If the Dataflow analysis 
 reaches a $\top$ or the program entry is reached, the analysis reports a 
 potential memory leak.
 
-\paragraph{Aliasing Information}
 
-A pointer analysis should be used to get the aliasing information, 
-which is then used to get the disjointness information. Flow-insensitive 
-pointer analysis such as Andersen style~\cite{andersen} or 
-Steensgaard's~\cite{steensgaard} can be used to get two kinds of required 
-information:
-
-\begin{itemize}
-  \item $Rgn$: the set of memory regions 
-    (i.e. different regions model disjoint sets of memory locations);
-  \item $pt(e)$: points-to information between regions.
-\end{itemize}
-
-In this work, we use Chen's implementation on the Andersen's 
-analysis~\cite{chen} to get the above two information.
-The regions are represented by the $AllocaInst$ or $CallInst$ to the $malloc()$ 
-function in \llvm's SSA form. And the points-to set is represented by the 
-set of the memory regions a pointer may point to.
-
-
-\subsection{Language Semantics}
+\subsection{Core Imperative Language}
 \label{ss:semantics}
 
-In this section we describe the semantics of the core imperative language 
+In this section we describe the core imperative language 
 used by the algorithm, which helps better understand the later sections.
 
 \paragraph{Syntax} 
@@ -81,15 +61,32 @@ An expression $e$ is disjoint from a region set
 $rs$, written $e\#rs$, if updates in any of the regions in $rs$ do not 
 affect value of $e$:
 \begin{align*}
-e\#rs \ iff \ \forall(*e')\in Mem(e). pt(e')\cap rs=\emptyset
+e\#rs \iff \forall(*e')\in Mem(e). pt(e')\cap rs=\emptyset
 \end{align*}
 
+Where $pt(e')$ is the point-to set of the expression $e'$. 
+A pointer analysis should be used to get such aliasing information. 
+Flow-insensitive pointer analysis such as Andersen's~\cite{andersen} or 
+Steensgaard's~\cite{steensgaard} can be used to get the two kinds of 
+required information:
+
+\begin{itemize}
+  \item $Rgn$: the set of memory regions 
+    (i.e. different regions model disjoint sets of memory locations);
+  \item $pt(e)$: points-to information between regions.
+\end{itemize}
+
+In this work, we use Chen's implementation~\cite{chen} on the Andersen's 
+analysis to get the above two information.
+The regions are represented by the $AllocaInst$ or $CallInst$ to the $malloc()$ 
+function in \llvm's SSA form. And the points-to set is represented by the 
+set of the memory regions a pointer may point to.
 
 
-\subsection{Dataflow Elements}
+\subsection{Backward Dataflow for Memory Leak}
 \label{ss:dataflow}
 
-This subsection describes the Dataflow elements in the memory leak analysis. 
+This subsection describes the backward Dataflow in the memory leak analysis. 
 
 \paragraph{Direction}
 
@@ -117,7 +114,7 @@ The analysis issues leak probes for the statements that can cause a potential
 memory leakage. Especially, at the following programming points:
 
 \begin{enumerate}[(a)]
-  \item Assignments: for each $*x_0\gets x_1$ build a dataflow triple 
+  \item Assignments: for each $*x_0\gets x_1$, build a dataflow triple 
     $(pt(e_0),\{*e_0\},\{e_1\})$;
   \item Allocations: each $*x_0\gets malloc$ is probed as $*x_0\gets 0$;
   \item Deallocations: for each $free(e)$, issue probes that correspond to a 
@@ -134,7 +131,7 @@ hidden and cannot be accessed directly.
 
 The partial ordering for the flow value is such that 
 \begin{align*}
-  (S_1,H_1,M_1)\sqsubseteq (S_2,H_2,M_2) \ &iif \ 
+  (S_1,H_1,M_1)\sqsubseteq (S_2,H_2,M_2) & \text{  iif  } 
   S_1\subseteq S_2 \wedge H_1\supseteq H_2 \wedge M_1\supseteq M_2
 \end{align*}
 
@@ -159,12 +156,14 @@ Infeasible(S,H,M) &= \exists e \in H. Miss(e,(S,H,M)) \\
   M' &= {e|e\in M \wedge \urcorner ImplicitMiss(e,(S,H,M))} \\
 \end{align*}
 
-where $ImplicitMiss()$ generates new misses;
-$Miss()$ checks whether an expression is in the Miss set or is a new miss; 
+where $ImplicitMiss()$ detectes new misses;
+$Miss()$ checks whether an expression is either in the Miss set or is a new miss; 
 $Infeasible()$ indicates a contradiction;
-$Cleanup()$ removes implicit miss to keep the dataflow facts as small as possible and avoid redundancy, while the correctness is conserved.
+$Cleanup()$ removes implicit miss to keep the dataflow facts as small as possible 
+and avoid redundancy, while the correctness is reserved.
 
-Four kinds of statements are analyzed:
+Four kinds of transfer functions are used corresponding to four kinds of 
+statements under analysis:
 
 \subsubparagraph{(1) Assignments}
 
@@ -196,7 +195,7 @@ pre-state); and $e^{--}$ denotes that $Miss(e,(S,H,M))$. The set $\omega$ is
 the set of regions potentially written by the assignment: $w=pt(e_0)$. Hence,
 an expression has the same value before and after the statement if it is 
 disjoint from $\omega$. 
-[FILTER 1-4] judges which expressions are reserved from the post-state to the 
+[FILTER 1-4] judge which expressions are reserved from the post-state to the 
 pre-state. [SUBST 1-2] generate new elements in the Hit and Miss sets.
 
 
