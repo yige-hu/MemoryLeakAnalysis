@@ -1,0 +1,50 @@
+Benchmark Notes
+===============
+
+
+All benchmarks downloaded from:
+https://sourceware.org/git/?p=glibc.git;a=summary
+
+
+
+1. glibc_math
+
+  atest-exp.c
+  atest-sincos.c
+
+No false positive
+
+
+
+2. glibc_crypt
+
+  md5-crypt.c
+  sha256-crypt.c
+
+Assertion failure in Andersen's analysis:
+
+memLeak$ opt -load ../andersen/Debug+Asserts/l
+ib/libAnders.so -load ./MemLeak.so -leak-pass md5-crypt.bc > /dev/null
+opt: ConstraintCollect.cpp:386: void Andersen::addConstraintForCall(llvm::ImmutableCallSite): Assertion `argIndex != AndersNodeFactory::InvalidIndex && "Failed to find arg node!"' failed.
+0  opt             0x0000000001adc544 llvm::sys::PrintStackTrace(_IO_FILE*) + 38
+1  opt             0x0000000001adc7c1
+2  opt             0x0000000001adc176
+3  libpthread.so.0 0x00007ff587b1ccb0
+4  libc.so.6       0x00007ff586d69425 gsignal + 53
+5  libc.so.6       0x00007ff586d6cb8b abort + 379
+6  libc.so.6       0x00007ff586d620ee
+7  libc.so.6       0x00007ff586d62192
+8  libAnders.so    0x00007ff586ae2193 Andersen::addConstraintForCall(llvm::ImmutableCallSite) + 1811
+9  libAnders.so    0x00007ff586ae0bd9 Andersen::collectConstraintsForInstruction(llvm::Instruction const*) + 457
+10 libAnders.so    0x00007ff586ae04b2 Andersen::collectConstraints(llvm::Module&) + 754
+11 libAnders.so    0x00007ff586ad790c Andersen::runOnModule(llvm::Module&) + 92
+12 opt             0x0000000001a57b62
+13 opt             0x0000000001a5814c llvm::legacy::PassManagerImpl::run(llvm::Module&) + 244
+14 opt             0x0000000001a58357 llvm::legacy::PassManager::run(llvm::Module&) + 39
+15 opt             0x0000000000a310ce main + 6187
+16 libc.so.6       0x00007ff586d5476d __libc_start_main + 237
+17 opt             0x0000000000a136a9
+Stack dump:
+0.      Program arguments: opt -load ../andersen/Debug+Asserts/lib/libAnders.so -load ./MemLeak.so -leak-pass md5-crypt.bc
+1.      Running pass 'Andersen's inclusion-based points-to analysis' on module 'md5-crypt.bc'.
+Aborted (core dumped)
